@@ -8,7 +8,7 @@ void MainMenuInput();
 void MainMenuLogic();
 
 void SetMenuBounds(); // Logic function reserved for mainly bounds
-void OutputSelectionArrow(int); // Outputs selection arrow with proper formating with argument of menu position
+void OutputOption(int, const char[10]); // Outputs selection arrow with proper formating with argument of menu position
 
 // Function Prototypes
 void drawLogo(int, int); // Draws logo at position x,y, based off argument
