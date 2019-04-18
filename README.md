@@ -20,16 +20,16 @@ This version of Tetris is programmed with C++17 using Microsoft Visual Studio.
 * Pausing functionality
 * Saved score data
 
-# Files
+## Files
 
-## Main.cpp
+### Main.cpp
 
 Contains the main() function as well as function prototypes. Primarily composed of functions for readability.
 
-## Implementation.h
+### Implementation.h
 
 Contains variables, necessary headers and function definitions. Functions routinely run in screen loops are considered routines.
 
-## DataStructure.h
+### DataStructure.h
 
 Contains any data structure that needs to be called, including classes and arrays of any dimension.
