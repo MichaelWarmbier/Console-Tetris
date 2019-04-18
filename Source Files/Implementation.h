@@ -20,6 +20,7 @@ int menu_main_option_selected = 1;
 
 // Misc
 int color_value = 0;
+bool menu_egg = false;
 
 // Tetris Game Variables
 
@@ -50,6 +51,11 @@ void MainMenuInput() {
 		case 's':
 			menu_main_option_selected++;
 			break;
+		case '*':
+			menu_egg = true;
+			system("CLS");
+			cout << "\a";
+			break;
 		}
 	}
 }
@@ -60,33 +66,39 @@ void MainMenuLogic() {
 
 
 // Functions - Main Menu
-	void SetMenuBounds() {
-		// Color visual logic
-		color_change_counter++;
-		if (color_change_counter > 20) {
-			color_change_counter = 0;
-			color_value++;
-		}
-		// Set menu_main_option_selected bounds
-		if (menu_main_option_selected < 1)
-			menu_main_option_selected = 1;
-		if (menu_main_option_selected > 4)
-			menu_main_option_selected = 4;
+void SetMenuBounds() {
+	// Color visual logic
+	color_change_counter++;
+	if (color_change_counter > 20) {
+		color_change_counter = 0;
+		color_value++;
 	}
-	void OutputOption(int option, const char option_name[10]) {
+	// Set menu_main_option_selected bounds
+	if (menu_main_option_selected < 1)
+		menu_main_option_selected = 1;
+	if (menu_main_option_selected > 4)
+		menu_main_option_selected = 4;
+}
+void OutputOption(int option, const char option_name[10]) {
+	if (!menu_egg)
 		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		cout << list_dot;
-		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-		cout << " " << option_name;
-		if (menu_main_option_selected == option) {
+	else
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+	cout << list_dot;
+	SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	cout << " " << option_name;
+	if (menu_main_option_selected == option) {
+		if (!menu_egg)
 			SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-			cout << " " << selection_arrow;
-			SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-		}
 		else
-			cout << "  ";
-		cout << endl;
+			SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+		cout << " " << selection_arrow;
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
 	}
+	else
+		cout << "  ";
+	cout << endl;
+}
 void drawLogo(int x, int y) {
 	COORD coordinates;
 	coordinates.X = x; coordinates.Y = y;
@@ -94,27 +106,45 @@ void drawLogo(int x, int y) {
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 22; j++) {
 			if (logo[i][j] == getColor(color_value)) {
-				SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN);
+				if (!menu_egg)
+					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN);
+				else 
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 1)) {
-				SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+				if (!menu_egg)
+					SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+				else
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 2)) {
-				SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE);
+				if (!menu_egg)
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE);
+				else
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 3)) {
-				SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+				if (!menu_egg)
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+				else
+					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 4)) {
-				SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_BLUE);
+				if (!menu_egg)
+					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_BLUE);
+				else
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 5)) {
-				SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
+				if (!menu_egg)
+					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
+				else
+					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
 				cout << solid_block;
 			}
 			else
@@ -122,6 +152,10 @@ void drawLogo(int x, int y) {
 		}
 		cout << endl;
 		indent(x);
+	}
+	SetConsoleTextAttribute(console_handle, FOREGROUND_INTENSITY | FOREGROUND_RED);
+	if (menu_egg) {
+		cout << " The Soviet Mind Game" << endl;
 	}
 	cout << endl;
 	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
