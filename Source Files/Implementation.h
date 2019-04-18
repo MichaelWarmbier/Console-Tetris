@@ -2,13 +2,14 @@
 #include <iostream>
 #include <Windows.h>
 #include <ctime>
+#include <string>
 #include <conio.h>
 using namespace std;
 HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "DataStructure.h"
 
 // Characters
-const char solid_block = 219, empty_space = 32, list_dot = 254, selection_arrow = 174;
+const unsigned char solid_block = 219, empty_space = 32, list_dot = 254, selection_arrow = 174;
 
 // Exit Conditions
 bool EXIT_PROGRAM = false, EXIT_MENU = false, EXIT_TETRIS = true;
@@ -20,6 +21,9 @@ int menu_main_option_selected = 1;
 // Misc
 int color_value = 0;
 
+// Tetris Game Variables
+
+
 // Main Routines - Main Menu
 void MainMenuSetup() {
 	ShowConsoleCursor(false);
@@ -27,18 +31,14 @@ void MainMenuSetup() {
 }
 void MainMenuDraw() {
 	drawLogo(20, 3);
-	indent(24); cout << list_dot;
-	cout << " Play Tetris!";
-	OutputSelectionArrow(1);
-	indent(24); cout << list_dot;
-	cout << " Options";
-	OutputSelectionArrow(2);
-	indent(24); cout << list_dot;
-	cout << " How To Play";
-	OutputSelectionArrow(3);
-	indent(24); cout << list_dot;
-	cout << " Exit Game";
-	OutputSelectionArrow(4);
+	indent(24);
+	OutputOption(1, "Play Tetris");
+	indent(24);
+	OutputOption(2, "Options");
+	indent(24);
+	OutputOption(3, "How To Play");
+	indent(24);
+	OutputOption(4, "Exit Game");
 	
 }
 void MainMenuInput() {
@@ -55,34 +55,38 @@ void MainMenuInput() {
 }
 void MainMenuLogic() {
 	SetMenuBounds();
-
 }
-// Lesser Routines
-void SetMenuBounds() {
-	// Color visual logic
-	color_change_counter++;
-	if (color_change_counter > 20) {
-		color_change_counter = 0;
-		color_value++;
-	}
-	// Set menu_main_option_selected bounds
-	if (menu_main_option_selected < 1)
-		menu_main_option_selected = 1;
-	if (menu_main_option_selected > 4)
-		menu_main_option_selected = 4;
-}
-void OutputSelectionArrow(int option) {
-	if (menu_main_option_selected == option)
-		cout << " " << selection_arrow;
-	else
-		cout << "  ";
-	cout << endl;
-}
-
 // Main Routines - Tetris
 
 
 // Functions - Main Menu
+	void SetMenuBounds() {
+		// Color visual logic
+		color_change_counter++;
+		if (color_change_counter > 20) {
+			color_change_counter = 0;
+			color_value++;
+		}
+		// Set menu_main_option_selected bounds
+		if (menu_main_option_selected < 1)
+			menu_main_option_selected = 1;
+		if (menu_main_option_selected > 4)
+			menu_main_option_selected = 4;
+	}
+	void OutputOption(int option, const char option_name[10]) {
+		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		cout << list_dot;
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+		cout << " " << option_name;
+		if (menu_main_option_selected == option) {
+			SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			cout << " " << selection_arrow;
+			SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+		}
+		else
+			cout << "  ";
+		cout << endl;
+	}
 void drawLogo(int x, int y) {
 	COORD coordinates;
 	coordinates.X = x; coordinates.Y = y;
