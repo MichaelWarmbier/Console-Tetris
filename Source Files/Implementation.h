@@ -7,6 +7,7 @@
 using namespace std;
 HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "DataStructure.h"
+COORD coordinates;
 
 // Characters
 const unsigned char solid_block = 219, empty_space = 32, list_dot = 254, selection_arrow = 174;
@@ -21,6 +22,7 @@ int menu_main_option_selected = 1;
 // Misc
 int color_value = 0;
 bool menu_egg = false;
+bool draw_HTP = false;
 
 // Tetris Game Variables
 
@@ -40,6 +42,7 @@ void MainMenuDraw() {
 	OutputOption(3, "How To Play");
 	indent(24);
 	OutputOption(4, "Exit Game");
+	DrawHowToPlay();
 	
 }
 void MainMenuInput() {
@@ -50,6 +53,15 @@ void MainMenuInput() {
 			break;
 		case 's':
 			menu_main_option_selected++;
+			break;
+		case 13:
+			if (menu_main_option_selected == 4) {
+				EXIT_PROGRAM = true;
+				EXIT_MENU = true;
+			}
+			else if (menu_main_option_selected == 3) {
+				draw_HTP = !draw_HTP;
+			}
 			break;
 		case '*':
 			menu_egg = true;
@@ -66,6 +78,74 @@ void MainMenuLogic() {
 
 
 // Functions - Main Menu
+void DrawHowToPlay() {
+	coordinates.X = 45; coordinates.Y = 5;
+	SetConsoleCursorPosition(console_handle, coordinates);
+	if (draw_HTP) {
+		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+		cout << "How To Play";
+		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+		newLine(45, 2);
+		cout << "Stack the blocks. Every line gets you more points and is clear.";
+		newLine(45, 2);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << empty_space << solid_block;
+		newLine(45, 1);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << empty_space << solid_block << " " << selection_arrow << " There are seven kinds of blocks!";
+		newLine(45, 1);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << solid_block << solid_block;
+		newLine(45, 2);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << "If you stack all the way to the ceiling, you lose!";
+		newLine(45, 2);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+		cout << "Controls";
+		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+		newLine(45, 2);
+		cout << "ENTER ---------- Pauses Game";
+		newLine(45, 1);
+		cout << "ESC ------------ Exits Game";
+		newLine(45, 1);
+		cout << "WASD / ARROWS -- Movement Controls";
+		newLine(45, 1);
+		cout << "Q -------------- Rotate Left";
+		newLine(45, 1);
+		cout << "E -------------- Rotate Right";
+	}
+	else {
+		cout << "           ";
+		newLine(45, 2);
+		cout << "                                                            ";
+		newLine(45, 2);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << "  ";
+		newLine(45, 1);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << "                                     ";
+		newLine(45, 1);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << "  ";
+		newLine(45, 2);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << "                                                  ";
+		newLine(45, 2);
+		SetConsoleCursorPosition(console_handle, coordinates);
+		cout << "        ";
+		newLine(45, 2);
+		cout << "                                    ";
+		newLine(45, 1);
+		cout << "                                    ";
+		newLine(45, 1);
+		cout << "                                                 ";
+		newLine(45, 1);
+		cout << "                                    ";
+		newLine(45, 1);
+		cout << "                                    ";
+	}
+}
 void SetMenuBounds() {
 	// Color visual logic
 	color_change_counter++;
@@ -100,7 +180,6 @@ void OutputOption(int option, const char option_name[10]) {
 	cout << endl;
 }
 void drawLogo(int x, int y) {
-	COORD coordinates;
 	coordinates.X = x; coordinates.Y = y;
 	SetConsoleCursorPosition(console_handle, coordinates);
 	for (int i = 0; i < 5; i++) {
@@ -195,4 +274,9 @@ void ShowConsoleCursor(bool flag) {
 void indent(int i) {
 	for (int dent = 0; dent < i; dent++)
 		cout << " ";
+}
+void newLine(int x, int y) {
+	coordinates.X = x;
+	coordinates.Y += y;
+	SetConsoleCursorPosition(console_handle, coordinates);
 }
