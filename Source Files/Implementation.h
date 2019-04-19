@@ -118,7 +118,7 @@ void DrawHowToPlay() {
 	else {
 		cout << "           ";
 		newLine(45, 2);
-		cout << "                                                            ";
+		cout << "                                                                 ";
 		newLine(45, 2);
 		SetConsoleCursorPosition(console_handle, coordinates);
 		cout << "  ";
