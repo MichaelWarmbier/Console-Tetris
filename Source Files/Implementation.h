@@ -86,7 +86,7 @@ void DrawHowToPlay() {
 		cout << "How To Play";
 		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 		newLine(45, 2);
-		cout << "Stack the blocks. Every line gets you more points and is clear.";
+		cout << "Stack the blocks. Every line you make gets cleared and earns you points!";
 		newLine(45, 2);
 		SetConsoleCursorPosition(console_handle, coordinates);
 		cout << empty_space << solid_block;
