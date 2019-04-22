@@ -10,7 +10,7 @@ HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 COORD coordinates;
 
 // Characters
-const unsigned char solid_block = 219, empty_space = 32, list_dot = 254, selection_arrow = 174;
+const unsigned char solid_block = 219, empty_space = 32, list_dot = 254, selection_arrow = 174, trans_block = 176;
 
 // Exit Conditions
 bool EXIT_PROGRAM = false, EXIT_MENU = false, EXIT_TETRIS = true;
@@ -25,7 +25,23 @@ bool menu_egg = false;
 bool draw_HTP = false;
 
 // Tetris Game Variables
+char next_block = '?';
+char current_block = '?';
+bool pause = false;
+bool game_start = false;
+bool score = 0;
+bool lines_cleared = 0;
+bool level = 1;
+bool o_count = 0;
+bool i_count = 0;
+bool t_count = 0;
+bool l_count = 0;
+bool j_count = 0;
+bool s_count = 0;
+bool z_count = 0;
 
+int ref_y = 1;
+int ref_x = 6;
 
 // Main Routines - Main Menu
 void MainMenuSetup() {
@@ -62,6 +78,10 @@ void MainMenuInput() {
 			else if (menu_main_option_selected == 3) {
 				draw_HTP = !draw_HTP;
 			}
+			else if (menu_main_option_selected == 1) {
+				EXIT_MENU = true;
+				EXIT_TETRIS = false;
+			}
 			break;
 		case '*':
 			menu_egg = true;
@@ -75,7 +95,97 @@ void MainMenuLogic() {
 	SetMenuBounds();
 }
 // Main Routines - Tetris
+void TetrisSetup() {
+	system("CLS");
+	system("MODE 47, 25");
+}
+void TetrisDraw() {
+	DrawBoard(4,2);
+	DrawStatistics(26, 2);
+}
+void TetrisInput() {
+	if (_kbhit()) {
+		switch (_getch()) {
+		case 13:
+			if (pause)
+				pause = false;
+			else if (game_start)
+				pause = true;
+			else if (!game_start)
+				game_start = true;
+			break;
+		case 'a':
+			ref_x--;
+			break;
+		case 'd':
+			ref_x++;
+			break;
+		}
+	}
+}
+void TetrisLogic() {
 
+}
+
+// Functions - Tetris
+void DrawBoard(int x, int y) {
+	coordinates.X = x;
+	coordinates.Y = y;
+	SetConsoleCursorPosition(console_handle, coordinates);
+	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	cout << "Score: " << score;
+	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
+	newLine(x, 1);
+	for (int y = 0; y < 20; y++) {
+		for (int x = 0; x < 20; x++) {
+			if (tetris_board[y][x] == '#')
+				cout << solid_block;
+			else if (((tetris_board[y][x] > 64 && tetris_board[y][x] < 123) || (tetris_board[y][x] == ':')) && tetris_board[y][x] != 'b')
+				cout << tetris_board[y][x];
+			else if (tetris_board[y][x] == 'b')
+				cout << next_block;
+			else
+				cout << empty_space;
+		}
+		cout << endl;
+		indent(x);
+	}
+	cout << "\r";
+	indent(x);
+	if (!game_start)
+		cout << "PRESS ENTER TO START";
+	else if (pause)
+		cout << "GAME IS PAUSED";
+	else
+		cout << "                     ";
+}
+void DrawStatistics(int x, int y) {
+	coordinates.X = x;
+	coordinates.Y = y;
+	newLine(x, 0);
+	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	indent(4);
+	cout << "Statistics";
+	newLine(x, 2);
+	cout << "Cleared Lines: " << lines_cleared;
+	newLine(x, 2);
+	cout << "Level: " << level;
+	newLine(x, 2);
+	cout << "O Blocks: " << o_count;
+	newLine(x, 2);
+	cout << "I Blocks: " << i_count;;
+	newLine(x, 2);
+	cout << "T Blocks: " << t_count;;
+	newLine(x, 2);
+	cout << "L Blocks: " << l_count;;
+	newLine(x, 2);
+	cout << "J Blocks: " << j_count;;
+	newLine(x, 2);
+	cout << "S Blocks: " << s_count;;
+	newLine(x, 2);
+	cout << "Z Blocks: " << z_count;;
+
+}
 
 // Functions - Main Menu
 void DrawHowToPlay() {
@@ -118,7 +228,7 @@ void DrawHowToPlay() {
 	else {
 		cout << "           ";
 		newLine(45, 2);
-		cout << "                                                                 ";
+		cout << "                                                                         ";
 		newLine(45, 2);
 		SetConsoleCursorPosition(console_handle, coordinates);
 		cout << "  ";
