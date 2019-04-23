@@ -51,7 +51,7 @@ int main() {
 		while (!EXIT_TETRIS && (timer += (dt = FPS + wait(FPS)))) { // Tetris Loop
 			TetrisDraw();
 			TetrisInput();
-			if (!pause && game_start)
+			if (game_state == LIMBO || game_state == BEFORE)
 				TetrisLogic();
 		}
 	}
