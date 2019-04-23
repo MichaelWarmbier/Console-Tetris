@@ -4,27 +4,27 @@
 #include <ctime>
 #include <string>
 #include <conio.h>
+#include <chrono>
 using namespace std;
+using namespace chrono;
 HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #include "DataStructure.h"
 COORD coordinates;
 
-// Characters
+// Global Variables
 const unsigned char solid_block = 219, empty_space = 32, list_dot = 254, selection_arrow = 174, trans_block = 176;
-
-// Exit Conditions
 bool EXIT_PROGRAM = false, EXIT_MENU = false, EXIT_TETRIS = true;
+double FPS = 1.0 / 90.0;
+double timer = 0, dt = 0;
 
-// Counters
+// Menu Variables
 int color_change_counter = 0;
 int menu_main_option_selected = 1;
-
-// Misc
 int color_value = 0;
 bool menu_egg = false;
 bool draw_HTP = false;
 
-// Tetris Game Variables
+// Tetris Variables
 char next_block = '?';
 char current_block = '?';
 bool pause = false;
@@ -43,7 +43,9 @@ bool z_count = 0;
 int ref_y = 1;
 int ref_x = 6;
 
+////////////////////////////
 // Main Routines - Main Menu
+////////////////////////////
 void MainMenuSetup() {
 	ShowConsoleCursor(false);
 
@@ -59,7 +61,7 @@ void MainMenuDraw() {
 	indent(24);
 	OutputOption(4, "Exit Game");
 	DrawHowToPlay();
-	
+
 }
 void MainMenuInput() {
 	if (_kbhit()) {
@@ -94,13 +96,16 @@ void MainMenuInput() {
 void MainMenuLogic() {
 	SetMenuBounds();
 }
+
+/////////////////////////
 // Main Routines - Tetris
+/////////////////////////
 void TetrisSetup() {
 	system("CLS");
 	system("MODE 47, 25");
 }
 void TetrisDraw() {
-	DrawBoard(4,2);
+	DrawBoard(4, 2);
 	DrawStatistics(26, 2);
 }
 void TetrisInput() {
@@ -127,14 +132,16 @@ void TetrisLogic() {
 
 }
 
+/////////////////////
 // Functions - Tetris
+/////////////////////
 void DrawBoard(int x, int y) {
 	coordinates.X = x;
 	coordinates.Y = y;
 	SetConsoleCursorPosition(console_handle, coordinates);
-	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	SetColor("WHITE");
 	cout << "Score: " << score;
-	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
+	SetColor("GRAY");
 	newLine(x, 1);
 	for (int y = 0; y < 20; y++) {
 		for (int x = 0; x < 20; x++) {
@@ -163,7 +170,7 @@ void DrawStatistics(int x, int y) {
 	coordinates.X = x;
 	coordinates.Y = y;
 	newLine(x, 0);
-	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	SetColor("WHITE");
 	indent(4);
 	cout << "Statistics";
 	newLine(x, 2);
@@ -187,14 +194,16 @@ void DrawStatistics(int x, int y) {
 
 }
 
+////////////////////////
 // Functions - Main Menu
+////////////////////////
 void DrawHowToPlay() {
 	coordinates.X = 45; coordinates.Y = 5;
 	SetConsoleCursorPosition(console_handle, coordinates);
 	if (draw_HTP) {
-		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+		SetColor("BLUE");
 		cout << "How To Play";
-		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+		SetColor("LIGHTBLUE");
 		newLine(45, 2);
 		cout << "Stack the blocks. Every line you make gets cleared and earns you points!";
 		newLine(45, 2);
@@ -211,13 +220,13 @@ void DrawHowToPlay() {
 		cout << "If you stack all the way to the ceiling, you lose!";
 		newLine(45, 2);
 		SetConsoleCursorPosition(console_handle, coordinates);
-		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+		SetColor("BLUE");
 		cout << "Controls";
-		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+		SetColor("LIGHTBLUE");
 		newLine(45, 2);
 		cout << "ENTER ---------- Pauses Game";
 		newLine(45, 1);
-		cout << "ESC ------------ Exits Game";
+		cout << "SPACE ----------- Drops Block";
 		newLine(45, 1);
 		cout << "WASD / ARROWS -- Movement Controls";
 		newLine(45, 1);
@@ -247,7 +256,7 @@ void DrawHowToPlay() {
 		newLine(45, 2);
 		cout << "                                    ";
 		newLine(45, 1);
-		cout << "                                    ";
+		cout << "                                            ";
 		newLine(45, 1);
 		cout << "                                                 ";
 		newLine(45, 1);
@@ -271,19 +280,19 @@ void SetMenuBounds() {
 }
 void OutputOption(int option, const char option_name[10]) {
 	if (!menu_egg)
-		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		SetColor("LIGHTGREEN");
 	else
-		SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+		SetColor("RED");
 	cout << list_dot;
-	SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	SetColor("WHITE");
 	cout << " " << option_name;
 	if (menu_main_option_selected == option) {
 		if (!menu_egg)
-			SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			SetColor("LIGHTGREEN");
 		else
-			SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+			SetColor("RED");
 		cout << " " << selection_arrow;
-		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+		SetColor("WHITE");
 	}
 	else
 		cout << "  ";
@@ -296,44 +305,44 @@ void drawLogo(int x, int y) {
 		for (int j = 0; j < 22; j++) {
 			if (logo[i][j] == getColor(color_value)) {
 				if (!menu_egg)
-					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN);
-				else 
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+					SetColor("GREEN");
+				else
+					SetColor("RED");
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 1)) {
 				if (!menu_egg)
-					SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+					SetColor("BLUE");
 				else
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+					SetColor("RED");
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 2)) {
 				if (!menu_egg)
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE);
+					SetColor("PURPLE");
 				else
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+					SetColor("RED");
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 3)) {
 				if (!menu_egg)
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+					SetColor("RED");
 				else
-					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
+					SetColor("YELLOW");
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 4)) {
 				if (!menu_egg)
-					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_BLUE);
+					SetColor("CYAN");
 				else
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+					SetColor("RED");
 				cout << solid_block;
 			}
 			else if (logo[i][j] == getColor(color_value + 5)) {
 				if (!menu_egg)
-					SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED);
+					SetColor("YELLOW");
 				else
-					SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+					SetColor("RED");
 				cout << solid_block;
 			}
 			else
@@ -342,12 +351,12 @@ void drawLogo(int x, int y) {
 		cout << endl;
 		indent(x);
 	}
-	SetConsoleTextAttribute(console_handle, FOREGROUND_INTENSITY | FOREGROUND_RED);
+	SetColor("PINK");
 	if (menu_egg) {
 		cout << " The Soviet Mind Game" << endl;
 	}
 	cout << endl;
-	SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);
+	SetColor("WHITE");
 }
 char getColor(int color_value_param) {
 	switch ((color_value_param + 1) % 6) {
@@ -374,6 +383,10 @@ char getColor(int color_value_param) {
 		break;
 	}
 }
+
+///////////////////
+// Global Functions
+///////////////////
 void ShowConsoleCursor(bool flag) {
 	CONSOLE_CURSOR_INFO     cursorInfo;
 
@@ -389,4 +402,54 @@ void newLine(int x, int y) {
 	coordinates.X = x;
 	coordinates.Y += y;
 	SetConsoleCursorPosition(console_handle, coordinates);
+}
+void SetColor(const char color[15]) {
+	if (color == "RED")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED);
+	else if (color == "BLUE")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE);
+	else if (color == "GREEN")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN);
+	else if (color == "PURPLE")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE);
+	else if (color == "MAGENTA")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+	else if (color == "YELLOW")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_GREEN);
+	else if (color == "CYAN")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_BLUE);
+	else if (color == "ORANGE")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY);
+	else if (color == "LIGHTBLUE")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+	else if (color == "LIGHTGREEN")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	else if (color == "PINK" || color == "LIGHTRED")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_INTENSITY);
+	else if (color == "WHITE")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	else if (color == "GRAY")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+}
+
+/////////////////////
+// Borrowed Functions
+/////////////////////
+bool KeyIsDown(char key, bool pressed, bool held) {
+	int keyState = GetAsyncKeyState(static_cast<int>(key));
+	return (pressed && (keyState & 1)) || (held && (keyState & 0xA000));
+}
+double getTime() {
+	return time_point_cast<nanoseconds>(high_resolution_clock::now()).time_since_epoch().count() / 1e9;
+}
+double getTimeSince(double startTime) {
+	return time_point_cast<nanoseconds>(high_resolution_clock::now()).time_since_epoch().count() / 1e9 - startTime;
+}
+double wait(double waitTime) {
+	double startTime = getTime();
+
+	while (waitTime > getTimeSince(startTime)) {}
+
+	return getTimeSince(startTime + waitTime);
 }
