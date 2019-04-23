@@ -20,7 +20,7 @@ double timer = 0, dt = 0;
 // Menu Variables
 input player_menu_input = NONE;
 int color_change_counter = 0;
-int menu_main_option_selected = 1;
+int menu_option_selected = 1;
 int color_value = 0;
 bool menu_egg = false;
 bool draw_HTP = false;
@@ -86,13 +86,13 @@ void MainMenuInput() {
 void MainMenuLogic() {
 	switch (player_menu_input) {
 	case UP:
-		menu_main_option_selected--;
+		menu_option_selected--;
 		break;
 	case DOWN:
-		menu_main_option_selected++;
+		menu_option_selected++;
 		break;
 	case ENTER:
-		switch (menu_main_option_selected) {
+		switch (menu_option_selected) {
 		case 1:
 			EXIT_MENU = true;
 			EXIT_TETRIS = false;
@@ -262,11 +262,11 @@ void SetMenuBounds() {
 		color_change_counter = 0;
 		color_value++;
 	}
-	// Set menu_main_option_selected bounds
-	if (menu_main_option_selected < 1)
-		menu_main_option_selected = 1;
-	if (menu_main_option_selected > 4)
-		menu_main_option_selected = 4;
+	// Set menu_option_selected bounds
+	if (menu_option_selected < 1)
+		menu_option_selected = 1;
+	if (menu_option_selected > 4)
+		menu_option_selected = 4;
 }
 void OutputOption(int option, const char option_name[10]) {
 	if (!menu_egg)
@@ -276,7 +276,7 @@ void OutputOption(int option, const char option_name[10]) {
 	cout << list_dot;
 	SetColor("WHITE");
 	cout << " " << option_name;
-	if (menu_main_option_selected == option) {
+	if (menu_option_selected == option) {
 		if (!menu_egg)
 			SetColor("LIGHTGREEN");
 		else
