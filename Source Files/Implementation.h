@@ -19,12 +19,17 @@ double FPS = 1.0 / 90.0;
 double timer = 0, dt = 0;
 
 // Menu Variables
+bool on_options = false;
 input player_menu_input = NONE;
 int color_change_counter = 0;
 int menu_option_selected = 1;
 int color_value = 0;
 bool menu_egg = false;
 bool draw_HTP = false;
+// Variables Set On Menu
+bool movement_delay = false;
+bool music = true;
+bool sounds = true;
 
 // Tetris Variables
 input player_tetris_input = NONE;
@@ -37,7 +42,7 @@ char next_block = '?';
 char current_block = '?';
 int score = 0;
 int lines_cleared = 0;
-int level = 2;
+int level = 1;
 int o_count = 0;
 int i_count = 0;
 int t_count = 0;
@@ -47,11 +52,18 @@ int s_count = 0;
 int z_count = 0;
 int ref_y = 1;
 int ref_x = 6;
+int frame_cap = 40;
 
 ////////////////////////////
 // Routines - Main Menu
 ////////////////////////////
 void MainMenuSetup() {
+	EXIT_MENU = false;
+	menu_option_selected = 1;
+	menu_egg = false;
+	draw_HTP = false;
+	color_value = 0;
+	player_menu_input = NONE;
 	ShowConsoleCursor(false); 
 	system("MODE 42, 25");
 	if (KeyIsDown('W', true, false))
@@ -68,13 +80,30 @@ void MainMenuSetup() {
 void MainMenuDraw() {
 	drawLogo(10, 3);
 	indent(14);
-	OutputOption(1, "Play Tetris");
+	OutputOption(1, "Play Tetris", "WHITE");
 	indent(14);
-	OutputOption(2, "Options");
+	OutputOption(2, "Options", "WHITE");
+	if (on_options) {
+		indent(16);
+		if (movement_delay)
+			OutputOption(5, "Movement Delay", "GREEN");
+		else
+			OutputOption(5, "Movement Delay", "RED");
+		indent(16);
+		if (music)
+			OutputOption(6, "Music", "GREEN");
+		else
+			OutputOption(6, "Music", "RED");
+		indent(16);
+		if (sounds)
+			OutputOption(7, "Sounds", "GREEN");
+		else
+			OutputOption(7, "Sounds", "RED");
+	}
 	indent(14);
-	OutputOption(3, "How To Play");
+	OutputOption(3, "How To Play", "WHITE");
 	indent(14);
-	OutputOption(4, "Exit Game");
+	OutputOption(4, "Exit Game", "WHITE");
 	if (draw_HTP)
 		DrawHowToPlay();
 
@@ -91,6 +120,8 @@ void MainMenuInput() {
 		player_menu_input = RIGHT;
 	if (KeyIsDown(13, true, false))
 		player_menu_input = ENTER;
+	if (KeyIsDown(8, true, false) || KeyIsDown(27, true, false))
+		player_menu_input = BACK;
 	if (KeyIsDown('*', true, false)) {
 		menu_egg = true;
 		system("CLS");
@@ -112,7 +143,7 @@ void MainMenuLogic() {
 			EXIT_TETRIS = false;
 			break;
 		case 2:
-			// TBA
+			on_options = true;
 			break;
 		case 3:
 			system("CLS");
@@ -126,6 +157,23 @@ void MainMenuLogic() {
 			EXIT_PROGRAM = true;
 			EXIT_MENU = true;
 			break;
+		// Options
+		case 5:
+			movement_delay = !movement_delay;
+			break;
+		case 6:
+			music = !music;
+			break;
+		case 7:
+			sounds = !sounds;
+			break;
+		}
+		break;
+	case BACK:
+		if (on_options) {
+			on_options = false;
+			menu_option_selected = 2;
+			system("CLS");
 		}
 		break;
 	}
@@ -141,6 +189,26 @@ void TetrisSetup() {
 	if (KeyIsDown(13, true, false))
 		true;
 	game_state = BEFORE;
+	player_tetris_input = NONE;
+	block_position = 1;
+	may_move = true;
+	halt_a_frame = false;
+	game_frames = 0;
+	next_block = '?';
+	current_block = '?';
+	score = 0;
+	lines_cleared = 0;
+	level = 1;
+	o_count = 0;
+	i_count = 0;
+	t_count = 0;
+	l_count = 0;
+	j_count = 0;
+	s_count = 0;
+	z_count = 0;
+	ref_y = 1;
+	ref_x = 6;
+	SetupBoard();
 }
 void TetrisDraw() {
 	DrawBoard(4, 2);
@@ -158,16 +226,14 @@ void TetrisInput() {
 		case DURING:
 			game_state = LIMBO;
 			break;
-		case AFTER:
-			break;
 		case LIMBO:
 			game_state = DURING;
 			break;
 		}
 	if (game_state == DURING) {
-		if (KeyIsDown('A', true, true))
+		if (KeyIsDown('A', true, !movement_delay))
 			player_tetris_input = LEFT;
-		if (KeyIsDown('D', true, true))
+		if (KeyIsDown('D', true, !movement_delay))
 			player_tetris_input = RIGHT;
 		if (KeyIsDown('S', true, true))
 			player_tetris_input = DOWN;
@@ -205,7 +271,7 @@ void TetrisLogic() {
 		}
 	}
 	if (CheckVerticalCollision() && player_tetris_input != DOWN) {
-		if (game_frames > 30) {
+		if (game_frames > frame_cap) {
 			SetBlock();
 			ResetBlock();
 			game_frames = 0;
@@ -220,7 +286,9 @@ void TetrisLogic() {
 	}
 	else if (player_tetris_input == DOWN)
 		IncrementY();
-	else if (game_frames > 30 && !halt_a_frame) {
+	else if (game_frames > frame_cap && !halt_a_frame) {
+		if (level < 10)
+			frame_cap -= (level - 1) * 2;
 		game_frames = 0;
 		IncrementY();
 	}
@@ -234,14 +302,73 @@ void TetrisLogic() {
 		next_block = SetRandomBlock();
 		IncrementBlockCounter();
 	}
+	CheckForLines();
 	ResetBoard();
 	DrawBlock();
+	CheckForLoss();
 	game_frames++;
+	level = (lines_cleared / 5) + 1;
 }
 
 /////////////////////
 // Functions - Tetris
 /////////////////////
+void SetLevelColor() {
+	switch (level % 3 + 1) {
+	case 1:
+		SetColor("LIGHTBLUE");
+		break;
+	case 2:
+		SetColor("LIGHTRED");
+		break;
+	case 3:
+		SetColor("LIGHTGREEN");
+		break;
+	default:
+		SetColor("WHITE");
+		break;
+	}
+}
+void CheckForLoss() {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 21; j++) {
+			if (tetris_board[i][j] == '@' && tetris_board_copy[i][j] == '#' && game_state != AFTER)
+				GameOver();
+		}
+	}
+}
+void GameOver() {
+	game_state = AFTER;
+	coordinates.X = 4;
+	coordinates.Y = 3;
+	SetConsoleCursorPosition(console_handle, coordinates);
+	for (int i = 1; i < 21; i++) {
+		for (int j = 0; j < 21; j++) {
+			SetRandomColor();
+			cout << trans_block;
+			Sleep(20);
+		}
+		cout << endl;
+		indent(4);
+	}
+	coordinates.X = 10;
+	coordinates.Y = 9;
+	SetConsoleCursorPosition(console_handle, coordinates);
+	SetColor("RED");
+	cout << "GAME OVER";
+	Sleep(5000);
+	EXIT_TETRIS = true;
+	EXIT_MENU = false;
+	system("CLS");
+}
+void SetupBoard() {
+	for (int i = 0; i < 21; i++) {
+		for (int j = 0; j < 20; j++) {
+			tetris_board_copy[i][j] = tetris_template[i][j];
+			tetris_board[i][j] = tetris_template[i][j];
+		}
+	}
+}
 void DrawBoard(int x, int y) {
 	coordinates.X = x;
 	coordinates.Y = y;
@@ -252,15 +379,22 @@ void DrawBoard(int x, int y) {
 	newLine(x, 1);
 	for (int y = 0; y < 20; y++) {
 		for (int x = 0; x < 20; x++) {
-			if (tetris_board[y][x] == '#' && ((y <= 0 || y >= 19) || (x <= 0 || x >= 11)))
+			if (tetris_board[y][x] == '#' && ((y <= 0 || y >= 19) || (x <= 0 || x >= 11))) {
+				SetLevelColor();
 				cout << solid_block;
+			}
 			else if (tetris_board[y][x] == '#') {
-				SetColor("DARKGRAY");
+				if (level % 3 == 0)
+					SetColor("BLUE");
+				if (level % 3 == 1)
+					SetColor("RED");
+				if (level % 3 == 2)
+					SetColor("GREEN");
 				cout << solid_block;
 				SetColor("GRAY");
 			}
 			else if (tetris_board[y][x] == '*') {
-				SetColor("GRAY");
+				SetLevelColor();
 				cout << solid_block;
 			}
 			else if (tetris_board[y][x] == '@' && y != 0) {
@@ -315,8 +449,41 @@ void DrawStatistics(int x, int y) {
 	newLine(x, 2);
 	cout << "Z Blocks: " << z_count;
 	newLine(x, 2);
-	cout << "Block Position: " << block_position;
 
+}
+void CheckForLines() {
+	int total_lines = 0;
+	int bottom_line = -1;
+	for (int i = 1; i < 19; i++) {
+		int blocks_found = 0;
+		for (int j = 1; j < 11; j++) {
+			if (tetris_board[i][j] == '#')
+				blocks_found++;
+		}
+		if (blocks_found == 10) {
+			total_lines++;
+			bottom_line = i;
+		}
+	}
+	if (total_lines > 0 && bottom_line != -1)
+		ClearLines(total_lines, bottom_line);
+}
+void ClearLines(int number, int bottom) {
+	score += static_cast<int>(200 * pow(number, 2));
+	lines_cleared += number;
+	for (int i = bottom; i > bottom - number; i--) {
+		for (int j = 1; j < 11; j++) {
+			tetris_board[i][j] = tetris_board[i - 1][j];
+		}
+	}
+	for (int i = bottom; i > 1; i--) {
+		for (int j = 1; j < 11; j++) {
+			if (tetris_board[i - number][j] != '*') {
+				tetris_board[i][j] = tetris_board[i - number][j];
+				tetris_board_copy[i][j] = tetris_board_copy[i - number][j];
+			}
+		}
+	}
 }
 void ResetBlock() {
 	ref_y = 2;
@@ -342,6 +509,33 @@ void SetBlock() {
 				tetris_board_copy[i][j] = '#';
 			}
 		}
+	}
+}
+void SetRandomColor() {
+	random_device generator;
+	uniform_int_distribution<int> distribution(1, 7);
+	switch (distribution(generator)) {
+	case 1:
+		SetColor("YELLOW");
+		break;
+	case 2:
+		SetColor("CYAN");
+		break;
+	case 3:
+		SetColor("PURPLE");
+		break;
+	case 4:
+		SetColor("ORANGE");
+		break;
+	case 5:
+		SetColor("BLUE");
+		break;
+	case 6:
+		SetColor("LIGHTGREEN");
+		break;
+	case 7:
+		SetColor("RED");
+		break;
 	}
 }
 char SetRandomBlock() {
@@ -1025,18 +1219,26 @@ void SetMenuBounds() {
 		color_value++;
 	}
 	// Set menu_option_selected bounds
-	if (menu_option_selected < 1)
-		menu_option_selected = 1;
-	if (menu_option_selected > 4)
-		menu_option_selected = 4;
+	if (!on_options) {
+		if (menu_option_selected < 1)
+			menu_option_selected = 1;
+		if (menu_option_selected > 4)
+			menu_option_selected = 4;
+	}
+	else {
+		if (menu_option_selected < 5)
+			menu_option_selected = 5;
+		if (menu_option_selected > 7)
+			menu_option_selected = 7;
+	}
 }
-void OutputOption(int option, const char option_name[10]) {
+void OutputOption(int option, const char option_name[10], const char color[10]) {
 	if (!menu_egg)
 		SetColor("LIGHTGREEN");
 	else
 		SetColor("RED");
 	cout << list_dot;
-	SetColor("WHITE");
+	SetColor(color);
 	cout << " " << option_name;
 	if (menu_option_selected == option) {
 		if (!menu_egg)
