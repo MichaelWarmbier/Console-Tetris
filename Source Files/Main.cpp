@@ -24,7 +24,7 @@ char getColor(int); // Returns a character based off an argument, for updating l
 void ShowConsoleCursor(bool); // Shows or hides cursor based off bool
 void DrawHowToPlay(); // Draws How To Play portion of screen
 void SetMenuBounds(); // Logic function reserved for mainly bounds
-void OutputOption(int, const char[10]); // Outputs selection arrow with proper formating with argument of menu position and option name
+void OutputOption(int, const char[10], const char[10]); // Outputs selection arrow with proper formating with argument of menu position, option name and color
 
 // Tetris Function Prototypes
 void DrawBoard(int, int); // Draws Tetris board
@@ -40,6 +40,13 @@ void CheckHorizontalCollision(); // Checks for collisions horizontally
 bool CheckVerticalCollision(); // Checks if block has landed
 void SetBlockColor(); // Sets color based off current block
 bool RotationCheck(); // Checks if rotation is possible based off current block
+void CheckForLines(); // Checks to see if lines were filled
+void ClearLines(int, int); // Clears lines given number and y position
+void SetLevelColor(); // Sets text color based off current level
+void CheckForLoss(); // Checks if game has been lost
+void GameOver(); // Plays game over 'animation'
+void SetRandomColor(); // Sets text color randomly
+void SetupBoard(); // Copies board template onto board and board copy
 
 // Borrowed Functions
 bool KeyIsDown(char key, bool pressed = true, bool held = true);
