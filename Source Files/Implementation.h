@@ -5,6 +5,7 @@
 #include <string>
 #include <conio.h>
 #include <chrono>
+#include <random>
 using namespace std;
 using namespace chrono;
 HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -28,11 +29,15 @@ bool draw_HTP = false;
 // Tetris Variables
 input player_tetris_input = NONE;
 state game_state = BEFORE;
+int block_position = 1;
+bool may_move = true;
+bool halt_a_frame = false;
+int game_frames = 0;
 char next_block = '?';
 char current_block = '?';
 int score = 0;
 int lines_cleared = 0;
-int level = 1;
+int level = 2;
 int o_count = 0;
 int i_count = 0;
 int t_count = 0;
@@ -40,16 +45,25 @@ int l_count = 0;
 int j_count = 0;
 int s_count = 0;
 int z_count = 0;
-
 int ref_y = 1;
 int ref_x = 6;
 
 ////////////////////////////
-// Main Routines - Main Menu
+// Routines - Main Menu
 ////////////////////////////
 void MainMenuSetup() {
 	ShowConsoleCursor(false); 
 	system("MODE 42, 25");
+	if (KeyIsDown('W', true, false))
+		true;
+	if (KeyIsDown('S', true, false))
+		true;
+	if (KeyIsDown('A', true, false))
+		true;
+	if (KeyIsDown('D', true, false))
+		true;
+	if (KeyIsDown(13, true, false))
+		true;
 }
 void MainMenuDraw() {
 	drawLogo(10, 3);
@@ -119,13 +133,14 @@ void MainMenuLogic() {
 }
 
 /////////////////////////
-// Main Routines - Tetris
+// Routines - Tetris
 /////////////////////////
 void TetrisSetup() {
 	system("CLS");
 	system("MODE 47, 25");
 	if (KeyIsDown(13, true, false))
 		true;
+	game_state = BEFORE;
 }
 void TetrisDraw() {
 	DrawBoard(4, 2);
@@ -149,9 +164,79 @@ void TetrisInput() {
 			game_state = DURING;
 			break;
 		}
+	if (game_state == DURING) {
+		if (KeyIsDown('A', true, true))
+			player_tetris_input = LEFT;
+		if (KeyIsDown('D', true, true))
+			player_tetris_input = RIGHT;
+		if (KeyIsDown('S', true, true))
+			player_tetris_input = DOWN;
+		if (KeyIsDown('Q', true, false))
+			player_tetris_input = RL;
+		if (KeyIsDown('E', true, false))
+			player_tetris_input = RR;
+	}
 }
 void TetrisLogic() {
-
+	may_move = true;
+	CheckHorizontalCollision();
+	if (RotationCheck()) {
+		switch (player_tetris_input) {
+		case RR:
+			block_position++;
+			break;
+		case RL:
+			block_position--;
+			break;
+		}
+	}
+	if (block_position > 4)
+		block_position = 1;
+	else if (block_position < 1)
+		block_position = 4;
+	if (may_move) {
+		switch (player_tetris_input) {
+		case LEFT:
+			ref_x--;
+			break;
+		case RIGHT:
+			ref_x++;
+			break;
+		}
+	}
+	if (CheckVerticalCollision() && player_tetris_input != DOWN) {
+		if (game_frames > 30) {
+			SetBlock();
+			ResetBlock();
+			game_frames = 0;
+		}
+		else
+			halt_a_frame = true;
+	}
+	else if (CheckVerticalCollision() && player_tetris_input == DOWN) {
+		SetBlock();
+		ResetBlock();
+		game_frames = 0;
+	}
+	else if (player_tetris_input == DOWN)
+		IncrementY();
+	else if (game_frames > 30 && !halt_a_frame) {
+		game_frames = 0;
+		IncrementY();
+	}
+	if (CheckVerticalCollision())
+		halt_a_frame = false;
+	if (current_block == '?') {
+		if (next_block == '?')
+			current_block = SetRandomBlock();
+		else
+			current_block = next_block;
+		next_block = SetRandomBlock();
+		IncrementBlockCounter();
+	}
+	ResetBoard();
+	DrawBlock();
+	game_frames++;
 }
 
 /////////////////////
@@ -167,12 +252,28 @@ void DrawBoard(int x, int y) {
 	newLine(x, 1);
 	for (int y = 0; y < 20; y++) {
 		for (int x = 0; x < 20; x++) {
-			if (tetris_board[y][x] == '#')
+			if (tetris_board[y][x] == '#' && ((y <= 0 || y >= 19) || (x <= 0 || x >= 11)))
+				cout << solid_block;
+			else if (tetris_board[y][x] == '#') {
+				SetColor("DARKGRAY");
+				cout << solid_block;
+				SetColor("GRAY");
+			}
+			else if (tetris_board[y][x] == '*') {
+				SetColor("GRAY");
+				cout << solid_block;
+			}
+			else if (tetris_board[y][x] == '@' && y != 0) {
+				SetBlockColor();
+				cout << solid_block;
+				SetColor("GRAY");
+			}
+			else if (tetris_board[y][x] == '@' && y == 0)
 				cout << solid_block;
 			else if (((tetris_board[y][x] > 64 && tetris_board[y][x] < 123) || (tetris_board[y][x] == ':')) && tetris_board[y][x] != 'b')
 				cout << tetris_board[y][x];
 			else if (tetris_board[y][x] == 'b')
-				cout << next_block;
+				cout << static_cast<char>(toupper(next_block));
 			else
 				cout << empty_space;
 		}
@@ -202,18 +303,679 @@ void DrawStatistics(int x, int y) {
 	newLine(x, 2);
 	cout << "O Blocks: " << o_count;
 	newLine(x, 2);
-	cout << "I Blocks: " << i_count;;
+	cout << "I Blocks: " << i_count;
 	newLine(x, 2);
-	cout << "T Blocks: " << t_count;;
+	cout << "T Blocks: " << t_count;
 	newLine(x, 2);
-	cout << "L Blocks: " << l_count;;
+	cout << "L Blocks: " << l_count;
 	newLine(x, 2);
-	cout << "J Blocks: " << j_count;;
+	cout << "J Blocks: " << j_count;
 	newLine(x, 2);
-	cout << "S Blocks: " << s_count;;
+	cout << "S Blocks: " << s_count;
 	newLine(x, 2);
-	cout << "Z Blocks: " << z_count;;
+	cout << "Z Blocks: " << z_count;
+	newLine(x, 2);
+	cout << "Block Position: " << block_position;
 
+}
+void ResetBlock() {
+	ref_y = 2;
+	ref_x = 6;
+	current_block = '?';
+	block_position = 1;
+}
+void IncrementY() {
+	ref_y++;
+}
+void ResetBoard() {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 21; j++) {
+			tetris_board[i][j] = tetris_board_copy[i][j];
+		}
+	}
+}
+void SetBlock() {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 21; j++) {
+			if (tetris_board[i][j] == '@') {
+				tetris_board[i][j] = '#';
+				tetris_board_copy[i][j] = '#';
+			}
+		}
+	}
+}
+char SetRandomBlock() {
+	random_device generator;
+	uniform_int_distribution<int> distribution(1, 7);
+	switch (distribution(generator)) {
+	case 1:
+		return 'o';
+		break;
+	case 2:
+		return 'i';
+		break;
+	case 3:
+		return 't';
+		break;
+	case 4:
+		return 'l';
+		break;
+	case 5:
+		return 'j';
+		break;
+	case 6:
+		return 's';
+		break;
+	case 7:
+		return 'z';
+		break;
+	default:
+		return '?';
+		break;
+	}
+}
+void IncrementBlockCounter() {
+	switch (current_block) {
+	case 'o':
+		o_count++;
+		break;
+	case 'i':
+		i_count++;
+		break;
+	case 't':
+		t_count++;
+		break;
+	case 'l':
+		l_count++;
+		break;
+	case 'j':
+		j_count++;
+		break;
+	case 's':
+		s_count++;
+		break;
+	case 'z':
+		z_count++;
+		break;
+	}
+}
+void DrawBlock() {
+	switch (current_block) {
+	case 'o':
+		tetris_board[ref_y][ref_x] = '@';
+		tetris_board[ref_y][ref_x + 1] = '@';
+		tetris_board[ref_y + 1][ref_x + 1] = '@';
+		tetris_board[ref_y + 1][ref_x] = '@';
+		break;
+	case 'i':
+		switch (block_position) {
+		case 1:
+		case 3:
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y + 2][ref_x] = '@';
+			break;
+		case 2:
+		case 4:
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x + 2] = '@';
+			break;
+		}
+		break;
+	case 't':
+		switch (block_position) {
+		case 1:
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x] = '@';
+			break;
+		case 2:
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			break;
+		case 3:
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			break;
+		case 4:
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x - 1] = '@';
+			break;
+		}
+		break;
+	case 'l':
+		switch (block_position) {
+		case 1:
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x + 1] = '@';
+			break;
+		case 2:
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y - 1][ref_x + 1] = '@';
+			break;
+		case 3:
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x - 1] = '@';
+			break;
+		case 4:
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y + 1][ref_x - 1] = '@';
+			break;
+		}
+		break;
+	case 'j':
+		switch (block_position) {
+		case 1:
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x - 1] = '@';
+			break;
+		case 2:
+			tetris_board[ref_y + 1][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			break;
+		case 3:
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x + 1] = '@';
+			break;
+		case 4:
+			tetris_board[ref_y - 1][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			break;
+		}
+		break;
+	case 's':
+		switch (block_position) {
+		case 1:
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		case 2:
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y + 1][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		case 3:
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		case 4:
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y - 1][ref_x - 1] = '@';
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		}
+		break;
+	case 'z':
+		switch (block_position) {
+		case 1:
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		case 2:
+			tetris_board[ref_y][ref_x + 1] = '@';
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y - 1][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		case 3:
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y + 1][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x + 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		case 4:
+			tetris_board[ref_y][ref_x - 1] = '@';
+			tetris_board[ref_y - 1][ref_x] = '@';
+			tetris_board[ref_y + 1][ref_x - 1] = '@';
+			tetris_board[ref_y][ref_x] = '@';
+			break;
+		}
+		break;
+	}
+}
+void CheckHorizontalCollision() {
+	DrawBlock();
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 21; j++) {
+			if (tetris_board[i][j] == '@' && player_tetris_input == LEFT) {
+				if (tetris_board[i][j - 1] == '#')
+					may_move = false;
+			}
+			else if (tetris_board[i][j] == '@' && player_tetris_input == RIGHT) {
+				if (tetris_board[i][j + 1] == '#')
+					may_move = false;
+			}
+		}
+	}
+}
+bool CheckVerticalCollision() {
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 21; j++) {
+			if (tetris_board[i][j] == '@' && tetris_board[i + 1][j] == '#')
+				return true;
+		}
+	}
+	return false;
+}
+void SetBlockColor() {
+	switch (current_block) {
+	case 'o':
+		SetColor("YELLOW");
+		break;
+	case 'i':
+		SetColor("CYAN");
+		break;
+	case 't':
+		SetColor("PURPLE");
+		break;
+	case 'l':
+		SetColor("ORANGE");
+		break;
+	case 'j':
+		SetColor("BLUE");
+		break;
+	case 's':
+		SetColor("LIGHTGREEN");
+		break;
+	case 'z':
+		SetColor("RED");
+		break;
+	default:
+		SetColor("WHITE");
+		break;
+	}
+}
+bool RotationCheck() {
+	switch (player_tetris_input) {
+	case RR:
+		switch (current_block) {
+		case 'o':
+			return true;
+			break;
+		case 'i':
+			switch (block_position) {
+			case 1:
+			case 3:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 2] == '#')
+					return false;
+				break;
+			case 2:
+			case 4:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 2][ref_x] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 't':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 'l':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 'j':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 's':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 'z':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		}
+		break;
+	case RL:
+		switch (current_block) {
+		case 'o':
+			return true;
+			break;
+		case 'i':
+			switch (block_position) {
+			case 1:
+			case 3:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 2] == '#')
+					return false;
+				break;
+			case 2:
+			case 4:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 2][ref_x] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 't':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 'l':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+			case 2:
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 'j':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 's':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		case 'z':
+			switch (block_position) {
+			case 1:
+				if (tetris_board[ref_y][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x - 1] == '#')
+					return false;
+				break;
+			case 2:
+				if (tetris_board[ref_y - 1][ref_x - 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x] == '#')
+					return false;
+				break;
+			case 3:
+				if (tetris_board[ref_y][ref_x + 1] == '#')
+					return false;
+				if (tetris_board[ref_y - 1][ref_x + 1] == '#')
+					return false;
+				break;
+			case 4:
+				if (tetris_board[ref_y + 1][ref_x] == '#')
+					return false;
+				if (tetris_board[ref_y + 1][ref_x + 1] == '#')
+					return false;
+				break;
+			}
+			break;
+		}
+		break;
+	}
+	return true;
 }
 
 ////////////////////////
@@ -416,10 +1178,12 @@ void SetColor(const char color[15]) {
 		SetConsoleTextAttribute(console_handle, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	else if (color == "PINK" || color == "LIGHTRED")
 		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_INTENSITY);
-	else if (color == "WHITE")
-		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
 	else if (color == "GRAY")
+		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
+	else if (color == "WHITE")
 		SetConsoleTextAttribute(console_handle, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	else if (color == "DARKGRAY")
+		SetConsoleTextAttribute(console_handle, 8);
 
 }
 
