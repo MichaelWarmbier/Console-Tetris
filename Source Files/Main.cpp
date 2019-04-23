@@ -29,6 +29,17 @@ void OutputOption(int, const char[10]); // Outputs selection arrow with proper f
 // Tetris Function Prototypes
 void DrawBoard(int, int); // Draws Tetris board
 void DrawStatistics(int, int); // Draws Tetris statistics
+void ResetBlock(); // Resets reference coordinates of block
+void IncrementY(); // Increments reference y value
+void ResetBoard(); // Resets board using data from it's copy
+void SetBlock(); // Converts falling blocks to landed blocks and copies those values to the board copy
+void DrawBlock(); // Sets block to correct position based off reference coordinate
+char SetRandomBlock(); // Returns the value of a character representing a block randomly
+void IncrementBlockCounter(); // Increments counter associated with current block
+void CheckHorizontalCollision(); // Checks for collisions horizontally
+bool CheckVerticalCollision(); // Checks if block has landed
+void SetBlockColor(); // Sets color based off current block
+bool RotationCheck(); // Checks if rotation is possible based off current block
 
 // Borrowed Functions
 bool KeyIsDown(char key, bool pressed = true, bool held = true);
@@ -51,7 +62,7 @@ int main() {
 		while (!EXIT_TETRIS && (timer += (dt = FPS + wait(FPS)))) { // Tetris Loop
 			TetrisDraw();
 			TetrisInput();
-			if (game_state == LIMBO || game_state == BEFORE)
+			if (!(game_state == LIMBO || game_state == BEFORE))
 				TetrisLogic();
 		}
 	}
