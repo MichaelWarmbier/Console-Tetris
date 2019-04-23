@@ -18,6 +18,7 @@ double FPS = 1.0 / 90.0;
 double timer = 0, dt = 0;
 
 // Menu Variables
+input player_menu_input = NONE;
 int color_change_counter = 0;
 int menu_main_option_selected = 1;
 int color_value = 0;
@@ -25,20 +26,20 @@ bool menu_egg = false;
 bool draw_HTP = false;
 
 // Tetris Variables
+input player_tetris_input = NONE;
+state game_state = BEFORE;
 char next_block = '?';
 char current_block = '?';
-bool pause = false;
-bool game_start = false;
-bool score = 0;
-bool lines_cleared = 0;
-bool level = 1;
-bool o_count = 0;
-bool i_count = 0;
-bool t_count = 0;
-bool l_count = 0;
-bool j_count = 0;
-bool s_count = 0;
-bool z_count = 0;
+int score = 0;
+int lines_cleared = 0;
+int level = 1;
+int o_count = 0;
+int i_count = 0;
+int t_count = 0;
+int l_count = 0;
+int j_count = 0;
+int s_count = 0;
+int z_count = 0;
 
 int ref_y = 1;
 int ref_x = 6;
@@ -47,53 +48,73 @@ int ref_x = 6;
 // Main Routines - Main Menu
 ////////////////////////////
 void MainMenuSetup() {
-	ShowConsoleCursor(false);
-
+	ShowConsoleCursor(false); 
+	system("MODE 42, 25");
 }
 void MainMenuDraw() {
-	drawLogo(20, 3);
-	indent(24);
+	drawLogo(10, 3);
+	indent(14);
 	OutputOption(1, "Play Tetris");
-	indent(24);
+	indent(14);
 	OutputOption(2, "Options");
-	indent(24);
+	indent(14);
 	OutputOption(3, "How To Play");
-	indent(24);
+	indent(14);
 	OutputOption(4, "Exit Game");
-	DrawHowToPlay();
+	if (draw_HTP)
+		DrawHowToPlay();
 
 }
 void MainMenuInput() {
-	if (_kbhit()) {
-		switch (_getch()) {
-		case 'w':
-			menu_main_option_selected--;
-			break;
-		case 's':
-			menu_main_option_selected++;
-			break;
-		case 13:
-			if (menu_main_option_selected == 4) {
-				EXIT_PROGRAM = true;
-				EXIT_MENU = true;
-			}
-			else if (menu_main_option_selected == 3) {
-				draw_HTP = !draw_HTP;
-			}
-			else if (menu_main_option_selected == 1) {
-				EXIT_MENU = true;
-				EXIT_TETRIS = false;
-			}
-			break;
-		case '*':
-			menu_egg = true;
-			system("CLS");
-			cout << "\a";
-			break;
-		}
+	player_menu_input = NONE;
+	if (KeyIsDown('W', true, false))
+		player_menu_input = UP;
+	if (KeyIsDown('S', true, false))
+		player_menu_input = DOWN;
+	if (KeyIsDown('A', true, false))
+		player_menu_input = LEFT;
+	if (KeyIsDown('D', true, false))
+		player_menu_input = RIGHT;
+	if (KeyIsDown(13, true, false))
+		player_menu_input = ENTER;
+	if (KeyIsDown('*', true, false)) {
+		menu_egg = true;
+		system("CLS");
+		cout << "\a";
 	}
 }
 void MainMenuLogic() {
+	switch (player_menu_input) {
+	case UP:
+		menu_main_option_selected--;
+		break;
+	case DOWN:
+		menu_main_option_selected++;
+		break;
+	case ENTER:
+		switch (menu_main_option_selected) {
+		case 1:
+			EXIT_MENU = true;
+			EXIT_TETRIS = false;
+			break;
+		case 2:
+			// TBA
+			break;
+		case 3:
+			system("CLS");
+			draw_HTP = !draw_HTP;
+			if (draw_HTP)
+				system("MODE 120, 25");
+			else
+				system("MODE 42, 25");
+			break;
+		case 4:
+			EXIT_PROGRAM = true;
+			EXIT_MENU = true;
+			break;
+		}
+		break;
+	}
 	SetMenuBounds();
 }
 
@@ -103,30 +124,31 @@ void MainMenuLogic() {
 void TetrisSetup() {
 	system("CLS");
 	system("MODE 47, 25");
+	if (KeyIsDown(13, true, false))
+		true;
 }
 void TetrisDraw() {
 	DrawBoard(4, 2);
 	DrawStatistics(26, 2);
 }
 void TetrisInput() {
-	if (_kbhit()) {
-		switch (_getch()) {
-		case 13:
-			if (pause)
-				pause = false;
-			else if (game_start)
-				pause = true;
-			else if (!game_start)
-				game_start = true;
+	player_tetris_input = NONE;
+	if (KeyIsDown(13, true, false))
+		player_tetris_input = ENTER;
+	if (player_tetris_input == ENTER)
+		switch (game_state) {
+		case BEFORE:
+			game_state = DURING;
 			break;
-		case 'a':
-			ref_x--;
+		case DURING:
+			game_state = LIMBO;
 			break;
-		case 'd':
-			ref_x++;
+		case AFTER:
+			break;
+		case LIMBO:
+			game_state = DURING;
 			break;
 		}
-	}
 }
 void TetrisLogic() {
 
@@ -159,9 +181,9 @@ void DrawBoard(int x, int y) {
 	}
 	cout << "\r";
 	indent(x);
-	if (!game_start)
+	if (game_state == BEFORE)
 		cout << "PRESS ENTER TO START";
-	else if (pause)
+	else if (game_state == LIMBO)
 		cout << "GAME IS PAUSED";
 	else
 		cout << "                     ";
@@ -200,70 +222,38 @@ void DrawStatistics(int x, int y) {
 void DrawHowToPlay() {
 	coordinates.X = 45; coordinates.Y = 5;
 	SetConsoleCursorPosition(console_handle, coordinates);
-	if (draw_HTP) {
-		SetColor("BLUE");
-		cout << "How To Play";
-		SetColor("LIGHTBLUE");
-		newLine(45, 2);
-		cout << "Stack the blocks. Every line you make gets cleared and earns you points!";
-		newLine(45, 2);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << empty_space << solid_block;
-		newLine(45, 1);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << empty_space << solid_block << " " << selection_arrow << " There are seven kinds of blocks!";
-		newLine(45, 1);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << solid_block << solid_block;
-		newLine(45, 2);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << "If you stack all the way to the ceiling, you lose!";
-		newLine(45, 2);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		SetColor("BLUE");
-		cout << "Controls";
-		SetColor("LIGHTBLUE");
-		newLine(45, 2);
-		cout << "ENTER ---------- Pauses Game";
-		newLine(45, 1);
-		cout << "SPACE ----------- Drops Block";
-		newLine(45, 1);
-		cout << "WASD / ARROWS -- Movement Controls";
-		newLine(45, 1);
-		cout << "Q -------------- Rotate Left";
-		newLine(45, 1);
-		cout << "E -------------- Rotate Right";
-	}
-	else {
-		cout << "           ";
-		newLine(45, 2);
-		cout << "                                                                         ";
-		newLine(45, 2);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << "  ";
-		newLine(45, 1);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << "                                     ";
-		newLine(45, 1);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << "  ";
-		newLine(45, 2);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << "                                                  ";
-		newLine(45, 2);
-		SetConsoleCursorPosition(console_handle, coordinates);
-		cout << "        ";
-		newLine(45, 2);
-		cout << "                                    ";
-		newLine(45, 1);
-		cout << "                                            ";
-		newLine(45, 1);
-		cout << "                                                 ";
-		newLine(45, 1);
-		cout << "                                    ";
-		newLine(45, 1);
-		cout << "                                    ";
-	}
+	SetColor("BLUE");
+	cout << "How To Play";
+	SetColor("LIGHTBLUE");
+	newLine(45, 2);
+	cout << "Stack the blocks. Every line you make gets cleared and earns you points!";
+	newLine(45, 2);
+	SetConsoleCursorPosition(console_handle, coordinates);
+	cout << empty_space << solid_block;
+	newLine(45, 1);
+	SetConsoleCursorPosition(console_handle, coordinates);
+	cout << empty_space << solid_block << " " << selection_arrow << " There are seven kinds of blocks!";
+	newLine(45, 1);
+	SetConsoleCursorPosition(console_handle, coordinates);
+	cout << solid_block << solid_block;
+	newLine(45, 2);
+	SetConsoleCursorPosition(console_handle, coordinates);
+	cout << "If you stack all the way to the ceiling, you lose!";
+	newLine(45, 2);
+	SetConsoleCursorPosition(console_handle, coordinates);
+	SetColor("BLUE");
+	cout << "Controls";
+	SetColor("LIGHTBLUE");
+	newLine(45, 2);
+	cout << "ENTER ---------- Pauses Game";
+	newLine(45, 1);
+	cout << "SPACE ----------- Drops Block";
+	newLine(45, 1);
+	cout << "WASD / ARROWS -- Movement Controls";
+	newLine(45, 1);
+	cout << "Q -------------- Rotate Left";
+	newLine(45, 1);
+	cout << "E -------------- Rotate Right";
 }
 void SetMenuBounds() {
 	// Color visual logic
