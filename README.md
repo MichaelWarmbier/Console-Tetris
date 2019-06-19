@@ -4,7 +4,7 @@
 
 Tetris is the original block-puzzle game desigend by Alexey Pajitnov and officially released on June 6th, 1984.
 
-Current design:
+### Current design:
 
 ![image](https://user-images.githubusercontent.com/44079959/59775479-4ce3a500-927f-11e9-8871-479e8500e695.png)
 
