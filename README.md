@@ -1,5 +1,8 @@
 # Console-Tetris
+
 ### Tetris designed for a Windows console window!
+
+Tetris is the original block-puzzle game desigend by Alexey Pajitnov and officially released on June 6th, 1984.
 
 Current design:
 
