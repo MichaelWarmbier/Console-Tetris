@@ -169,7 +169,7 @@ void Movement() {
 }
 void LowerShape() {
 	MayDrop = false;
-	if (PlayerInput == DOWN)
+	if (PlayerInput == DOWN && !CheckVerticalCollision())
 		DropTime = .1;
 	else
 		DropTime = .8;
