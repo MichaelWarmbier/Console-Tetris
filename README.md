@@ -1,6 +1,8 @@
 # Console-Tetris
 ### Tetris designed for a Windows console window!
 
+![image](https://user-images.githubusercontent.com/44079959/59775479-4ce3a500-927f-11e9-8871-479e8500e695.png)
+
 This version of Tetris is programmed with C++17 using Microsoft Visual Studio. 
 
 ## Planned Features -- Will be updated when first build is released
