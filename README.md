@@ -1,37 +1,31 @@
 # Console-Tetris
 ### Tetris designed for a Windows console window!
 
+Current design:
+
 ![image](https://user-images.githubusercontent.com/44079959/59775479-4ce3a500-927f-11e9-8871-479e8500e695.png)
 
-This version of Tetris is programmed with C++17 using Microsoft Visual Studio. 
+Console Tetris was programmed with C++ using Microsoft Visual Studio. 
 
-## Planned Features -- Will be updated when first build is released
+## To Do
 
-### Menu
-
-* Colorful and oldschool design
-* Options and How To Play
-* Highscore display
-
-### Game
-
-* Full Tetris Game
-* Level and score system
-* Statistics window
-* Debug commands
-* Pausing functionality
-* Saved score data
+- [ ] Finish rotation logic
+- [ ] Add line clearing
+- [ ] Add score
+- [ ] Add level
+- [ ] Add failure
+- [ ] Add main menu
 
 ## Files
 
 ### Main.cpp
 
-Contains the main() function as well as function prototypes. Primarily composed of functions for readability.
+Contains the main() function and routines.
 
-### Implementation.h
+### Functions.h
 
-Contains variables, necessary headers and function definitions. Functions routinely run in screen loops are considered routines.
+Contains all necessary headers, function prototypes and function definitions.
 
-### DataStructure.h
+### Info.h
 
-Contains any data structure that needs to be called, including classes and arrays of any dimension.
+Contains all variables and data structures.
