@@ -1,8 +1,8 @@
 # Console-Tetris
 
-### Tetris designed for a Windows console window!
+### Tetris entirely redesigned in C++
 
-Tetris is the original block-puzzle game desigend by Alexey Pajitnov and officially released on June 6th, 1984.
+Tetris is the original block-puzzle game desigend by Alexey Pajitnov and released on June 6th, 1984.
 
 ### Design:
 
@@ -24,17 +24,3 @@ Console Tetris was programmed with C++ using Microsoft Visual Studio.
 - [x] Add level
 - [ ] Add failure
 - [x] Add main menu
-
-## Files
-
-### Main.cpp
-
-Contains the main() function and routines.
-
-### Functions.h
-
-Contains all necessary headers, function prototypes and function definitions.
-
-### Info.h
-
-Contains all variables and data structures.
