@@ -1,10 +1,20 @@
-#include "Functions.h"
+#include "Function.h"
 int main() {
-	SetupTetris();
-	while (!EXIT_TETRIS && (timer += (dt = FPS + Wait(FPS)))) {
-		DrawTetris();
-		InputTetris();
-		LogicTetris();
+	while (!EXIT_PROGRAM) {
+		MenuSetup();
+		do {
+			MenuDraw();
+			MenuInput();
+			MenuLogic();
+			while (GetConsoleWindow() != GetForegroundWindow()) {}
+		} while (!EXIT_MENU);
+		GameSetup();
+		while (!EXIT_GAME) {
+			GameDraw();
+			GameInput();
+			GameLogic();
+			while (GetConsoleWindow() != GetForegroundWindow()) {}
+		};
 	}
 	return EXIT_SUCCESS;
 }
