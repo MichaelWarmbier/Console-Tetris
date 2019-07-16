@@ -1,6 +1,6 @@
 # Console-Tetris
 
-### Tetris entirely redesigned in C++
+### Tetris entirely redesigned using C++
 
 Tetris is the original block-puzzle game desigend by Alexey Pajitnov and released on June 6th, 1984.
 
