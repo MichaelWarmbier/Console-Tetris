@@ -8,9 +8,9 @@ private:
 		//////////////////////////////////////////
 		 16,000, // Gray Tile				// 001
 		144,000, // Sudo-transparent Tile	// 002
-		032,000, // Red Tile				// 003
+		 32,000, // Red Tile				// 003
 		 48,000, // Cyan Tile				// 004
-		064,000, // Orange Tile				// 005
+		 64,000, // Orange Tile				// 005
 		 80,000, // Blue Tile				// 006
 		 96,000, // Pink Tile				// 007
 		112,000, // Green Tile				// 008
@@ -70,12 +70,16 @@ private:
 		160, 48, // Z Preview				// 058
 
 	};
-	int Level; // Current Level
 
+	int Level; // Current Level
 	int X, Y; // Axis coordinates
+	int Rot; // Current rotation 
 
 	Direction pInput;
 	GameState State;
+	
+	BlockType CurrBlck;
+	BlockType NxtBlck;
 
 	int Board[WH][WW] = {
 		01,01,01,01,01,01,01,01,01,01,01,01,01,01,01,01,
@@ -103,19 +107,184 @@ private:
 		31,24,41,24,31,46,00,00,00,00,00,00,00,00,00,00,
 		31,28,33,24,38,46,00,00,00,00,00,00,00,00,00,00,
 	};
+	int BoardCopy[WH][WW]; // Copy of Board[][] used for comparison when detecting collision
+
+	/* Block Data */
+	const struct B1 {
+	public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			1,0,
+			1,1,
+			0,1,
+		//////////// - Rotation 2
+			1,0,
+			1,1,
+			0,1,
+		//////////// - Rotation 3
+			1,0,
+			1,1,
+			0,1,
+		//////////// - Rotation 4
+			1,0,
+			1,1,
+			0,1,
+		};
+	}; B1 O; // O Block Data
+	const struct B2{
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,-1,
+			0,1,
+			0,2,
+		//////////// - Rotation 2
+			-1,0,
+			1,0,
+			2,0,
+		//////////// - Rotation 3
+			0,-1,
+			0,1,
+			0,2,
+		//////////// - Rotation 4
+			-1,0,
+			1,0,
+			2,0,
+		};
+	}; B2 I; // I Block Data
+	const struct B3 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			-1,0,
+			1,0,
+			0,1,
+		//////////// - Rotation 2
+			-1,0,
+			0,-1,
+			0,1,
+		//////////// - Rotation 3
+			-1,0,
+			1,0,
+			0,-1,
+		//////////// - Rotation 4
+			1,0,
+			0,-1,
+			0,1,
+		};
+	}; B3 T; // T Block Data
+	const struct B4 {
+	public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,-1,
+			0,1,
+			1,1,
+		//////////// - Rotation 2
+			-1,0,
+			1,0,
+			-1,1,
+		//////////// - Rotation 3
+			0,-1,
+			0,1,
+			-1,-1,
+		//////////// - Rotation 4
+			-1,0,
+			1,0,
+			1,-1,
+		};
+	}; B4 L; // L Block Data
+	const struct B5 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,-1,
+			0,1,
+			1,-1,
+		//////////// - Rotation 2
+			-1,0,
+			1,0,
+			1,1,
+		//////////// - Rotation 3
+			0,-1,
+			0,1,
+			-1,1,
+		//////////// - Rotation 4
+			-1,0,
+			1,0,
+			-1,-1,
+		};
+	}; B5 J; // J Block Data
+	const struct B6 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,1,
+			1,0,
+			-1,1,
+		//////////// - Rotation 2
+			-1,0,
+			-1,-1,
+			0,1,
+		//////////// - Rotation 3
+			-1,0,
+			0,-1,
+			1,-1,
+		//////////// - Rotation 4
+			0,-1,
+			1,0,
+			1,1,
+		};
+	}; B6 S; // S Block Data
+	const struct B7 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			-1,0,
+			0,1,
+			1,1,
+		//////////// - Rotation 2
+			0,-1,
+			-1,0,
+			-1,1,
+		//////////// - Rotation 3
+			0,-1,
+			-1,-1,
+			1,0,
+		//////////// - Rotation 4
+			1,0,
+			1,-1,
+			0,1,
+		};
+	}; B7 Z; // Z Block Data
+
 public:
 	void DrawSprite(int spriteID, int x, int y) const; // Uses the index of sprites and active bitmap to output a sprite of the current global sprite size
 	void DrawBoard() const; // Outputs Board[][] using DrawSprite
-	void SetAxis(int x, int y);
+	void SetAxis(int x, int y); // Sets the given coordinate to the current axis
+	void CopyBoard(); // Copies data of Board to BoardCopy
+	bool IsBlockData(int data) const; // Returns true if given data is associated with block sprites
+	void DrawBlock(); // Draws CurrBlck at axis
+	void ClearBlock(int arr[WH][WW]); // Clears CurrBlck at axis
+	void ClearBoard(); // Clears inside of the board
+	void SetBlock(); // Sets block down after landing
+	void SetTile(int x, int y, int ID); // Sets a Board[][] index to given ID
+	void BlockTest(); // Tests block drawing
 
 	/* Logic functions for main loop*/
-	void Draw() const;
+	void Draw();
 	void Input();
 	void Logic();
 
 	/* Definitions of constructors and destructors may be changed later */
-	Game() { State = BEFORE; pInput = NONE; X = 5, Y = 10; };
-	Game(int L) :Level(L) { State = BEFORE; pInput = NONE; X = 5, Y = 10; };
+	Game() { State = BEFORE; pInput = NONE; X = 5, Y = 10; CurrBlck = bI; NxtBlck = bX; Rot = 0; };
+	Game(int L) :Level(L) { State = BEFORE; pInput = NONE; X = 5, Y = 10; CurrBlck = bX; NxtBlck = bX; Rot = 0; };
 	~Game() { };
 };
-
