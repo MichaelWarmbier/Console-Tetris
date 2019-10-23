@@ -1,4 +1,3 @@
-#pragma once
 #include "Game.h"
 
 /* Main */
@@ -20,4 +19,20 @@ int main() {
 bool KeyIsDown(char key, bool pressed, bool held) {
 	int keyState = GetAsyncKeyState(static_cast<int>(key));
 	return (pressed && (keyState & 1)) || (held && (keyState & 0xA000));
+}
+
+double GetTime() {
+	return time_point_cast<nanoseconds>(high_resolution_clock::now()).time_since_epoch().count() / 1e9;
+}
+
+double GetTimeSince(double startTime) {
+	return time_point_cast<nanoseconds>(high_resolution_clock::now()).time_since_epoch().count() / 1e9 - startTime;
+}
+
+double Wait(double waitTime) {
+	double startTime = GetTime();
+
+	while (waitTime > GetTimeSince(startTime)) {}
+
+	return GetTimeSince(startTime + waitTime);
 }
