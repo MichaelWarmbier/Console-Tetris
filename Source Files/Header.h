@@ -4,11 +4,14 @@
 #include <chrono>
 #include <tchar.h>
 #include <vector>
+#include <random>
 using namespace std;
 using namespace chrono;
 
-/* Debug Options */
+static random_device generator;
+static uniform_int_distribution<int> distribution(0, 6);
 
+/* Debug Options */
 static bool ForceSpriteTest = false;
 
 /* Exit Flags */
@@ -26,9 +29,11 @@ enum Direction {UP, DOWN, LEFT, RIGHT, NONE};
 enum BlockType {bO = 0, bI = 1, bT = 2, bL = 3, bJ = 4, bS = 5, bZ = 6, bX = 7};
 
 const int GSS = 16; // Global Sprite Size
-const int BH = 20, BW = 10, WH = 24, WW = 16; // Dimension Variables (Board and Window)
+const int BH = 20, BW = 10, WH = 24, WW = 17; // Dimension Variables (Board and Window)
 
 bool KeyIsDown(char key, bool pressed, bool held); // Returns true if passed key is pressed or held
 double GetTime(); // Returns UNIX time
 double GetTimeSince(double startTime); // Returns time since given UNIX time
 double Wait(double waitTime); // Pauses program for passed value of time
+void ShowConsoleCursor(bool showFlag); // Hides or reveals cursor
+void SetWindowDimensions(int x, int y); // Sets size of window
