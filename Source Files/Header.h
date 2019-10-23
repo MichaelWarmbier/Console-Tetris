@@ -3,8 +3,13 @@
 #include <windows.h>
 #include <chrono>
 #include <tchar.h>
+#include <vector>
 using namespace std;
 using namespace chrono;
+
+/* Debug Options */
+
+static bool ForceSpriteTest = false;
 
 /* Exit Flags */
 static bool EXIT_GAME_F = false;
@@ -18,8 +23,12 @@ const HBITMAP bmap = (HBITMAP)LoadImage(NULL, _T("ConsoleTetrisSpriteSheet.bmp")
 
 enum GameState {BEFORE, DURING, LIMBO, WIN, LOSS};
 enum Direction {UP, DOWN, LEFT, RIGHT, NONE};
+enum BlockType {bO = 0, bI = 1, bT = 2, bL = 3, bJ = 4, bS = 5, bZ = 6, bX = 7};
 
 const int GSS = 16; // Global Sprite Size
 const int BH = 20, BW = 10, WH = 24, WW = 16; // Dimension Variables (Board and Window)
 
 bool KeyIsDown(char key, bool pressed, bool held); // Returns true if passed key is pressed or held
+double GetTime(); // Returns UNIX time
+double GetTimeSince(double startTime); // Returns time since given UNIX time
+double Wait(double waitTime); // Pauses program for passed value of time
