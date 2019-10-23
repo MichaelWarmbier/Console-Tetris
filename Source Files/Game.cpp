@@ -19,6 +19,7 @@ void Game::DrawBoard() const {
 void Game::Draw() {
 	DrawBoard();
 	DrawBlock();
+	DrawNextBlock();
 }
 
 void Game::Input() {
@@ -178,4 +179,15 @@ void Game::ClearBoard() {
 void Game::SetBlock() {
 	/* This function is purely visual */
 	DrawBlock();
+}
+
+BlockType Game::GetRandomBlock() const {
+	return (BlockType)distribution(generator);
+}
+
+void Game::DrawNextBlock() {
+	if (NxtBlck == bX)
+		SetTile(13, 2, 47);
+	else
+		SetTile(13, 2, 52 + (int)NxtBlck);
 }
