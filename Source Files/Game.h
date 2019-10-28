@@ -4,10 +4,10 @@
 class Game {
 private:
 	const int Sprites[256][2] {
-		000,000, // Empty					// 000
+		000,000, // Background				// 000
 		//////////////////////////////////////////
-		 16,000, // Gray Tile				// 001
-		144,000, // Sudo-transparent Tile	// 002
+		 16,000, // Dark Gray Tile			// 001
+		144,000, // Light Gray Tile			// 002
 		 32,000, // Red Tile				// 003
 		 48,000, // Cyan Tile				// 004
 		 64,000, // Orange Tile				// 005
@@ -69,47 +69,55 @@ private:
 		144, 48, // S Preview				// 057
 		160, 48, // Z Preview				// 058
 		176, 48, // =						// 059
+		192, 48, // NE						// 060
+		208, 48, // XT						// 061
+		224, 48, // Empty					// 062
 	};
+
+	int BlockNums[7] = { 0,0,0,0,0,0,0 };
 
 	int Level; // Current Level
+	int LinesC; // Lines Cleared
 	int X, Y; // Axis coordinates
 	int Rot; // Current rotation 
+	double _DropTS; // Time stamp for decrementing block
+	int WaitTime; // Variable for game speed
+	bool SpeedUp;
 
-	Direction pInput;
-	GameState State;
+	Direction pInput; // User Input
+	GameState State; // State of the game
 	
-	BlockType CurrBlck;
-	BlockType NxtBlck;
+	BlockType CurrBlck; // Current falling block
+	BlockType NxtBlck; // Next block to fall
 
 	int Board[WH][WW] = {
-		01,01,01,01,01,01,01,01,01,01,01,01,01,01,01,01,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,01,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,01,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,01,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,01,01,01,01,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,00,00,00,00,00,00,00,00,00,00,01,00,00,00,00,00,
-		01,01,01,01,01,01,01,01,01,01,01,01,00,00,00,00,00,
-		31,24,41,24,31,46,00,00,00,00,00,01,00,00,00,00,00,
-		31,28,33,24,38,46,00,00,00,00,00,01,00,00,00,00,00,
+		02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,60,61,46,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,-1,-1,-1,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,-1,-1,-1,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,52,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,53,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,54,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,55,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,56,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,57,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,58,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,
+		02,31,24,41,24,31,46,02,10,10,10,02,02,02,02,02,02,
+		02,31,28,33,24,38,46,02,10,10,10,02,02,02,02,02,02,
 	};
 	int BoardCopy[WH][WW]; // Copy of Board[][] used for comparison when detecting collision
-
-	/* Block Data */
+	/* Block Data -- Temporary, may combine */
 	const struct B1 {
 	public:
 		int Limbs[12][2]{
@@ -270,15 +278,19 @@ public:
 	void DrawBoard() const; // Outputs Board[][] using DrawSprite
 	void SetAxis(int x, int y); // Sets the given coordinate to the current axis
 	void CopyBoard(); // Copies data of Board to BoardCopy
-	bool IsBlockData(int data) const; // Returns true if given data is associated with block sprites
-	void DrawBlock(); // Draws CurrBlck at axis
-	void ClearBlock(int arr[WH][WW]); // Clears CurrBlck at axis
+	bool IsBlockData(const int data) const; // Returns true if given data is associated with block sprites
+	void DrawBlock(bool SolidFlag); // Draws CurrBlck at axis
+	void ClearBoardCopy(); // Clears inside of the board copy
 	void ClearBoard(); // Clears inside of the board
-	void SetBlock(); // Sets block down after landing
 	void SetTile(int x, int y, int ID); // Sets a Board[][] index to given ID
 	void BlockTest(); // Tests block drawing
 	void DrawNextBlock(); // Draws icon for upcoming block
+	void ApplyInput(); // Applies input specifically in logic
 	BlockType GetRandomBlock() const; // Returns random BlockType
+	bool DecrementBlock(); // Y++
+	bool IsSolid(Direction Dir); // Collision Check
+	void ResetBlock(); // Resets block position to top
+	void DrawInteger(int x, int y, int size, int value); // Draw integer of two or three digits at a position
 
 	/* Logic functions for main loop*/
 	void Draw();
@@ -289,18 +301,25 @@ public:
 	Game() { 
 		State = BEFORE; 
 		pInput = NONE;
-		X = 5, Y = 10;
+		X = 5, Y = 3;
 		CurrBlck = bX;
 		NxtBlck = bX;
 		Rot = 0; 
-	};
-	Game(int L) :Level(L) { 
-		State = BEFORE; 
-		pInput = NONE;
-		X = 5, Y = 10; 
-		CurrBlck = bX; 
-		NxtBlck = GetRandomBlock();
-		Rot = 0; 
+		Level = 1;
+		LinesC = 0;
+		_DropTS = GetTime();
+		WaitTime = 1;
+		SpeedUp = false;
 	};
 	~Game() { };
 };
+
+
+/*
+- Create a function to set WaitTime
+
+
+
+
+
+*/
