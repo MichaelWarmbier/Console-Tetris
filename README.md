@@ -25,7 +25,7 @@ This version of Tetris is being developed using the standard libraries of C++ an
 
 Current Design:
 
-None.
+![image](https://cdn.discordapp.com/attachments/595796787109822474/638487378591481859/unknown.png)
 
 Old Design(s):
 
