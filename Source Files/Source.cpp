@@ -10,6 +10,7 @@ int main() {
 			Tetris->Draw();
 			Tetris->Input();
 			Tetris->Logic();
+			while (GetConsoleWindow() != GetForegroundWindow()) {}
 		}
 		delete Tetris;
 	} while (!EXIT_PROGRAM_F);
