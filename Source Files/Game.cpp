@@ -22,32 +22,62 @@ void Game::Draw() {
 	DrawBoard();
 	DrawBlock(true);
 	DrawNextBlock();
-	DrawInteger(8, 22, 3, Level - 1);
+	DrawInteger(8, 22, 3, Level);
 	DrawInteger(8, 23, 3, LinesC);
 	for (int i = 0; i < 7; i++)
 		DrawInteger(13, 7 + (2 * i), 2, BlockNums[i]);
 }
 
 void Game::Input() {
-	pInput = NONE;
-	// Note: Add secondary arrow-key controls
-	if (KeyIsDown('W', true, false) || KeyIsDown(38, true, false))
-		pInput = UP;
-	else if (KeyIsDown('S', true, false) || KeyIsDown(40, true, false))
-		pInput = DOWN;
-	else if (KeyIsDown('A', true, false) || KeyIsDown(37, true, false))
-		pInput = LEFT;
-	else if (KeyIsDown('D', true, false) || KeyIsDown(39, true, false))
-		pInput = RIGHT;
-	else if (KeyIsDown('Q', true, false))
-		pInput = RL;
-	else if (KeyIsDown('E', true, false))
-		pInput = RR;
+	if (!Pause) {
+		pInput = NONE;
+		if (KeyIsDown('W', true, false) || KeyIsDown(38, true, false))
+			pInput = UP;
+		else if (KeyIsDown('S', true, (State == DURING)) || KeyIsDown(40, true, (State == DURING)))
+			pInput = DOWN;
+		else if (KeyIsDown('A', true, false) || KeyIsDown(37, true, false))
+			pInput = LEFT;
+		else if (KeyIsDown('D', true, false) || KeyIsDown(39, true, false))
+			pInput = RIGHT;
+		else if (KeyIsDown('Q', true, false))
+			pInput = RL;
+		else if (KeyIsDown('E', true, false))
+			pInput = RR;
+		else if (KeyIsDown(27, true, false) && State == DURING)
+			EXIT_G = true;
+	}
+	if (KeyIsDown(13, true, false)) {
+		pInput = ENTER;
+		if (State == DURING)
+			Pause = !Pause;
+	}
 }
 
 void Game::Logic() {
 	if (ForceSpriteTest)
 		BlockTest();
+	else if (State == BEFORE) {
+		DrawMenu();
+		if (pInput == DOWN)
+			MenuSel++;
+		else if (pInput == UP)
+			MenuSel--;
+		if (MenuSel > 2)
+			MenuSel = 1;
+		if (MenuSel < 1)
+			MenuSel = 2;
+		if (pInput == ENTER) 
+			switch (MenuSel) {
+			case 1:
+				State = DURING;
+				ClearBoard();
+				break;
+			case 2:
+				EXIT_G = true;
+				EXIT_P = true;
+				break;
+			}
+	}
 	else if (State == DURING) {
 		if (CurrBlck == bX) {
 			CurrBlck = NxtBlck;
@@ -70,11 +100,13 @@ void Game::Logic() {
 		LineClear();
 		ClearBoard();
 		GameOver();
+		Level = LinesC / 10 + 1;
+		if (Level <= 3)
+			WaitTime = 1.2 - ((Level - 1.0) * .20);
 	}
 	else if (State == AFTER) {
 		DrawBoard();
 		Wait(2);
-		EXIT_P = true;
 		EXIT_G = true;
 	}
 	DrawBlock(true);
@@ -222,7 +254,7 @@ void Game::DrawNextBlock() {
 }
 
 bool Game::DecrementBlock() {
-	if ((GetTimeSince(_DropTS) > WaitTime || SpeedUp)) {
+	if ((GetTimeSince(_DropTS) > WaitTime || (SpeedUp && GetTimeSince(_DropTS) > .05))) {
 		if (!IsSolid(DOWN))
 			Y++;
 		_DropTS = GetTime();
@@ -342,19 +374,21 @@ void Game::DrawPause() {
 }
 
 void Game::DrawInteger(int x, int y, int size, int value) {
-	if (size != 3 && size != 2)
+	if (size != 3 && size != 2 && size != 4)
 		size = 2;
-	if (value > 999 && size == 3)
+	if (value > 9999 && size == 4)
+		value = 9999;
+	else if (value > 999 & size == 3)
 		value = 999;
 	else if (value > 99)
 		value = 99;
-	int Digits[3] = { value / 100, (value % 100) / 10 , value % 10 };
+	int Digits[4] = {value % 1000, (value % 1000) / 100, (value % 100) / 10 , value % 10 };
 	for (int i = 0; i < size; i++)
-		SetTile(x + (2 - i), y, Digits[2 - i] + 10);
+		SetTile(x + (3 - i), y, Digits[3 - i] + 10);
 }
 
 void Game::GameOver() {
-	for (int i = 0 + 1; i < BW + 1; i++)
+	for (int i = 5; i < 7; i++)
 		if (Board[2][i] == 1) {
 			State = AFTER;
 			for (int y = BH; y > 0; y--) {
@@ -374,4 +408,25 @@ void Game::GameOver() {
 			SetTile(7, 9, 37);
 			break;
 		}
+}
+
+void Game::SetTileS(int x, int y, const char str[10]) {
+	for (int i = 0; str[i] != '\0'; i++) {
+		if (toupper(str[i]) >= 65 && toupper(str[i]) <= 91)
+			SetTile(x + i, y, toupper(str[i]) - 45);
+	}
+}
+
+void Game::DrawMenu() {
+	SetTileS(3, 6, "Tetris");
+	SetTileS(2, 9, "Play");
+	if (MenuSel == 1)
+		SetTile(7, 9, 48);
+	else
+		SetTile(7, 9, 0);
+	SetTileS(2, 11, "Exit");
+	if (MenuSel == 2)
+		SetTile(7, 11, 48);
+	else
+		SetTile(7, 11, 0);
 }
