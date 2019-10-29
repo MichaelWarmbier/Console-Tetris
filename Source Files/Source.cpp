@@ -11,8 +11,7 @@ int main() {
 			Tetris->Draw();
 			Tetris->Input();
 			Tetris->Logic();
-			while (GetConsoleWindow() != GetForegroundWindow() || Tetris->Pause) { 
-				Tetris->Pause = true;
+			while (GetConsoleWindow() != GetForegroundWindow() && Tetris->State == DURING || Tetris->Pause) { 
 				Tetris->Input();
 				if (Tetris->State == DURING)
 					Tetris->DrawPause(); 
