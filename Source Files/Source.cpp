@@ -6,11 +6,14 @@ int main() {
 	SetWindowDimensions(WW + 1,WH + 3);
 	do {
 		Game* Tetris = new Game;
+		EXIT_GAME_F = false;
 		while (!EXIT_GAME_F) {
 			Tetris->Draw();
 			Tetris->Input();
 			Tetris->Logic();
-			while (GetConsoleWindow() != GetForegroundWindow()) { 
+			while (GetConsoleWindow() != GetForegroundWindow() || Tetris->Pause) { 
+				Tetris->Pause = true;
+				Tetris->Input();
 				if (Tetris->State == DURING)
 					Tetris->DrawPause(); 
 			}
