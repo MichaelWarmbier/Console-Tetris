@@ -82,10 +82,9 @@ private:
 	int Rot; // Current rotation 
 	double _DropTS; // Time stamp for decrementing block
 	int WaitTime; // Variable for game speed
-	bool SpeedUp;
+	bool SpeedUp; // Flag for increasing speed
 
 	Direction pInput; // User Input
-	GameState State; // State of the game
 	
 	BlockType CurrBlck; // Current falling block
 	BlockType NxtBlck; // Next block to fall
@@ -195,7 +194,7 @@ private:
 		//////////// - Rotation 2
 			-1,0,
 			1,0,
-			-1,1,
+			1,-1,
 		//////////// - Rotation 3
 			0,-1,
 			0,1,
@@ -203,7 +202,7 @@ private:
 		//////////// - Rotation 4
 			-1,0,
 			1,0,
-			1,-1,
+			-1,1,
 		};
 	}; B4 L; // L Block Data
 	const struct B5 {
@@ -217,7 +216,7 @@ private:
 		//////////// - Rotation 2
 			-1,0,
 			1,0,
-			1,1,
+			-1,-1,
 		//////////// - Rotation 3
 			0,-1,
 			0,1,
@@ -225,7 +224,7 @@ private:
 		//////////// - Rotation 4
 			-1,0,
 			1,0,
-			-1,-1,
+			1,1,
 		};
 	}; B5 J; // J Block Data
 	const struct B6 {
@@ -274,6 +273,9 @@ private:
 	}; B7 Z; // Z Block Data
 
 public:
+	bool EXIT_G, EXIT_P;
+	GameState State; // State of the game
+
 	void DrawSprite(int spriteID, int x, int y) const; // Uses the index of sprites and active bitmap to output a sprite of the current global sprite size
 	void DrawBoard() const; // Outputs Board[][] using DrawSprite
 	void SetAxis(int x, int y); // Sets the given coordinate to the current axis
@@ -293,6 +295,7 @@ public:
 	void ResetBlock(); // Resets block position to top
 	void DrawInteger(int x, int y, int size, int value); // Draw integer of two or three digits at a position
 	void LineClear(); // Returns true and clears a line if it can be
+	void GameOver(); // Begins game over sequence if game has been lost
 
 	/* Logic functions for main loop*/
 	void Draw();
@@ -301,9 +304,9 @@ public:
 
 	/* Definitions of constructors and destructors may be changed later */
 	Game() { 
-		State = BEFORE; 
+		State = DURING; 
 		pInput = NONE;
-		X = 5, Y = 3;
+		X = 5, Y = 2;
 		CurrBlck = bX;
 		NxtBlck = bX;
 		Rot = 0; 
@@ -312,16 +315,8 @@ public:
 		_DropTS = GetTime();
 		WaitTime = 1;
 		SpeedUp = false;
+		EXIT_G = false;
+		EXIT_P = false;
 	};
 	~Game() { };
 };
-
-
-/*
-- Create a function to set WaitTime
-
-
-
-
-
-*/
