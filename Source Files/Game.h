@@ -93,8 +93,8 @@ private:
 	int Board[WH][WW] = {
 		02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,
 		02,00,00,00,00,00,00,00,00,00,00,02,60,61,46,02,02,
-		02,00,00,00,00,00,00,00,00,00,00,02,-1,-1,-1,02,02,
-		02,00,00,00,00,00,00,00,00,00,00,02,-1,-1,-1,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,00,00,00,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,00,00,00,02,02,
 		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
 		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
 		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
@@ -288,9 +288,11 @@ public:
 	void ApplyInput(); // Applies input specifically in logic
 	BlockType GetRandomBlock() const; // Returns random BlockType
 	bool DecrementBlock(); // Y++
+	void DrawPause(); // Draws "Pause" string
 	bool IsSolid(Direction Dir); // Collision Check
 	void ResetBlock(); // Resets block position to top
 	void DrawInteger(int x, int y, int size, int value); // Draw integer of two or three digits at a position
+	void LineClear(); // Returns true and clears a line if it can be
 
 	/* Logic functions for main loop*/
 	void Draw();
