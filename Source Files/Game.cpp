@@ -68,6 +68,7 @@ void Game::Logic() {
 			}
 		}
 	}
+	LineClear();
 	ClearBoard();
 	DrawBlock(true);
 }
@@ -173,15 +174,44 @@ void Game::ClearBoard() {
 	}
 }
 
+void Game::LineClear() {
+	for (int y = 0 + 1; y < BH + 1; y++) {
+		int SolidBlocks = 0;
+		for (int x = 0 + 1; x < BW + 1; x++) {
+			if (Board[y][x] == 1)
+				SolidBlocks++;
+		}
+		if (SolidBlocks == 10) {
+			LinesC++;
+			for (int i = 0; i < 5; i++) {
+				for (int j = 0 + 1; j < BW + 1; j++) {
+					Board[y][j] = !Board[y][j];
+				}
+				Wait(.05);
+				DrawBoard();
+			}
+			for (int i = y - 1; i > 0; i--) {
+				for (int j = 0 + 1; j < BW + 1; j++) {
+					if (Board[i][j] == 1) {
+						Board[i][j] = 0;
+						Board[i + 1][j] = 1;
+					}
+				}
+			}
+		}
+	}
+}
+
 BlockType Game::GetRandomBlock() const {
 	return (BlockType)distribution(generator);
 }
 
 void Game::DrawNextBlock() {
 	if (NxtBlck == bX)
-		DrawSprite(47, 16 * 13, 16 * 2 + 6);
+	SetTile(13, 2, 47);
 	else
-		DrawSprite(52 + (int)NxtBlck, 16 * 13, 16 * 2 + 6);
+		SetTile(13, 2, 52 + (int)NxtBlck);
+
 }
 
 bool Game::DecrementBlock() {
@@ -293,6 +323,15 @@ void Game::ApplyInput() {
 		Rot = 3;
 	else if (Rot > 3)
 		Rot = 0;
+}
+
+void Game::DrawPause() {
+	DrawSprite(35, 3 * 16, 8 * 16);
+	DrawSprite(20, 4 * 16, 8 * 16);
+	DrawSprite(40, 5 * 16, 8 * 16);
+	DrawSprite(38, 6 * 16, 8 * 16);
+	DrawSprite(24, 7 * 16, 8 * 16);
+	DrawSprite(23, 8 * 16, 8 * 16);
 }
 
 void Game::DrawInteger(int x, int y, int size, int value) {
