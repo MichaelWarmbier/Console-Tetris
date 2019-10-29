@@ -5,12 +5,17 @@
 int main() {
 	SetWindowDimensions(WW + 1,WH + 3);
 	do {
-		Game * Tetris = new Game;
+		Game* Tetris = new Game;
 		while (!EXIT_GAME_F) {
 			Tetris->Draw();
 			Tetris->Input();
 			Tetris->Logic();
-			while (GetConsoleWindow() != GetForegroundWindow()) { Tetris->DrawPause(); }
+			while (GetConsoleWindow() != GetForegroundWindow()) { 
+				if (Tetris->State == DURING)
+					Tetris->DrawPause(); 
+			}
+			EXIT_PROGRAM_F = Tetris->EXIT_P;
+			EXIT_GAME_F = Tetris->EXIT_G;
 		}
 		delete Tetris;
 	} while (!EXIT_PROGRAM_F);
