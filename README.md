@@ -4,11 +4,15 @@
 
 Tetris is the original block-puzzle game desigend by Alexey Pajitnov and released on June 6th, 1984.
 
-###### Game is currently very unnfinished. As a result, build updates are _not_ currently being noted as different alpha versions.
+###### Game is currently unnfinished. Please keep this in mind when executing current or old releases.
 
 ## Description
 
 This version of Tetris is being developed using the standard libraries of C++ and the Windows.h header. Written and compiled in Visual Studio 2019. 
+
+## Installation
+
+Inside the releases folder are installer(s). Within file are all dependencies necessary to run the game. (Note: Older versions may be missing some .dll files, download the Visual C++ Redstristributables to remedy this)
 
 ## File System
 
@@ -20,6 +24,7 @@ This version of Tetris is being developed using the standard libraries of C++ an
 
 * Sprite Sheet - Holds one file, the main sprite sheet used for the game.
 
+* Releases - Contains installers.
 
 ## Design
 
