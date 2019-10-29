@@ -22,10 +22,10 @@ void Game::Draw() {
 	DrawBoard();
 	DrawBlock(true);
 	DrawNextBlock();
-	DrawInteger(8, 22, 3, Level);
-	DrawInteger(8, 23, 3, LinesC);
+	DrawInteger(7, 22, 3, Level);
+	DrawInteger(7, 23, 3, LinesC);
 	for (int i = 0; i < 7; i++)
-		DrawInteger(13, 7 + (2 * i), 2, BlockNums[i]);
+		DrawInteger(12, 7 + (2 * i), 2, BlockNums[i]);
 }
 
 void Game::Input() {
@@ -378,7 +378,7 @@ void Game::DrawInteger(int x, int y, int size, int value) {
 		size = 2;
 	if (value > 9999 && size == 4)
 		value = 9999;
-	else if (value > 999 & size == 3)
+	else if (value > 999.0 & size == 3.0)
 		value = 999;
 	else if (value > 99)
 		value = 99;
