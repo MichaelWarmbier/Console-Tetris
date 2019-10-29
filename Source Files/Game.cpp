@@ -48,7 +48,7 @@ void Game::Input() {
 void Game::Logic() {
 	if (ForceSpriteTest)
 		BlockTest();
-	else {
+	else if (State == DURING) {
 		if (CurrBlck == bX) {
 			CurrBlck = NxtBlck;
 			NxtBlck = GetRandomBlock();
@@ -67,15 +67,22 @@ void Game::Logic() {
 				CurrBlck = bX;
 			}
 		}
+		LineClear();
+		ClearBoard();
+		GameOver();
 	}
-	LineClear();
-	ClearBoard();
+	else if (State == AFTER) {
+		DrawBoard();
+		Wait(2);
+		EXIT_P = true;
+		EXIT_G = true;
+	}
 	DrawBlock(true);
 }
 
 void Game::ResetBlock() {
 	X = 5;
-	Y = 3;
+	Y = 2;
 }
 
 void Game::SetAxis(int x, int y) {
@@ -344,4 +351,27 @@ void Game::DrawInteger(int x, int y, int size, int value) {
 	int Digits[3] = { value / 100, (value % 100) / 10 , value % 10 };
 	for (int i = 0; i < size; i++)
 		SetTile(x + (2 - i), y, Digits[2 - i] + 10);
+}
+
+void Game::GameOver() {
+	for (int i = 0 + 1; i < BW + 1; i++)
+		if (Board[2][i] == 1) {
+			State = AFTER;
+			for (int y = BH; y > 0; y--) {
+				for (int x = 0 + 1; x < BW + 1; x++) {
+					Board[y][x] = 1;
+					Wait(.03);
+					DrawBoard();
+				}
+			}
+			SetTile(4, 8, 26);
+			SetTile(5, 8, 20);
+			SetTile(6, 8, 32);
+			SetTile(7, 8, 24);
+			SetTile(4, 9, 34);
+			SetTile(5, 9, 41);
+			SetTile(6, 9, 24);
+			SetTile(7, 9, 37);
+			break;
+		}
 }
