@@ -2,7 +2,9 @@
 
 /* Main */
 
+
 int main() {
+	SetConsoleTitle(_T("Tetris"));
 	SetWindowDimensions(WW + 1,WH + 3);
 	do {
 		Game* Tetris = new Game;
