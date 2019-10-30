@@ -277,6 +277,8 @@ public:
 	bool EXIT_G, EXIT_P; // Exit conditions before being transfered
 	GameState State; // State of the game
 	bool Pause; // Pause flag
+	bool tSound; // Sound Toggle
+	bool tMusic; // Music Toggle
 
 	void DrawSprite(int spriteID, int x, int y) const; // Uses the index of sprites and active bitmap to output a sprite of the current global sprite size
 	void DrawBoard() const; // Outputs Board[][] using DrawSprite
@@ -307,7 +309,7 @@ public:
 	void Logic();
 
 	/* Definitions of constructors and destructors may be changed later */
-	Game() { 
+	Game(bool M, bool S):tMusic(M),tSound(S) { 
 		MenuSel = 1;
 		State = BEFORE; 
 		pInput = NONE;
