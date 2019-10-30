@@ -27,8 +27,8 @@ enum GameState {BEFORE, DURING, LIMBO, AFTER};
 enum Direction {UP, DOWN, LEFT, RIGHT, NONE, RL, RR, ENTER};
 enum BlockType {bO = 0, bI = 1, bT = 2, bL = 3, bJ = 4, bS = 5, bZ = 6, bX = 7};
 
-const int GSS = 16; // Global Sprite Size
-const int BH = 20, BW = 10, WH = 24, WW = 17; // Dimension Variables (Board and Window)
+const int BH = 20, BW = 10, WH = 25, WW = 17; // Dimension Variables (Board and Window)
+const int GSS = 32; // Global Sprite Size
 
 bool KeyIsDown(char key, bool pressed, bool held); // Returns true if passed key is pressed or held
 double GetTime(); // Returns UNIX time
