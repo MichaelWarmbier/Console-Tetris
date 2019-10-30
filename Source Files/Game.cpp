@@ -72,10 +72,6 @@ void Game::Logic() {
 				State = DURING;
 				ClearBoard();
 				break;
-			case 4:
-				EXIT_G = true;
-				EXIT_P = true;
-				break;
 			case 2:
 				tSound = !tSound;
 				break;
@@ -87,6 +83,10 @@ void Game::Logic() {
 				else {
 					mciSendString("stop mp3", NULL, 0, NULL);
 				}
+				break;
+			case 4:
+				EXIT_G = true;
+				EXIT_P = true;
 				break;
 			}
 	}
@@ -114,9 +114,9 @@ void Game::Logic() {
 		LineClear();
 		ClearBoard();
 		GameOver();
-		Level = LinesC / 10 + 1;
-		if (Level <= 3)
-			WaitTime = 1.2 - ((Level - 1.0) * .20);
+		Level = LinesC / 5 + 1;
+		if (Level <= 5)
+			WaitTime = 1.2 - ((Level - 1.0) * .15);
 	}
 	else if (State == AFTER) {
 		DrawBoard();
@@ -381,12 +381,12 @@ void Game::ApplyInput() {
 }
 
 void Game::DrawPause() {
-	DrawSprite(35, 3 * 16, 8 * 16);
-	DrawSprite(20, 4 * 16, 8 * 16);
-	DrawSprite(40, 5 * 16, 8 * 16);
-	DrawSprite(38, 6 * 16, 8 * 16);
-	DrawSprite(24, 7 * 16, 8 * 16);
-	DrawSprite(23, 8 * 16, 8 * 16);
+	DrawSprite(35, 3 * GSS, 8 * GSS);
+	DrawSprite(20, 4 * GSS, 8 * GSS);
+	DrawSprite(40, 5 * GSS, 8 * GSS);
+	DrawSprite(38, 6 * GSS, 8 * GSS);
+	DrawSprite(24, 7 * GSS, 8 * GSS);
+	DrawSprite(23, 8 * GSS, 8 * GSS);
 }
 
 void Game::DrawInteger(int x, int y, int size, int value) {
@@ -394,7 +394,7 @@ void Game::DrawInteger(int x, int y, int size, int value) {
 		size = 2;
 	if (value > 9999 && size == 4)
 		value = 9999;
-	else if (value > 999.0 & size == 3.0)
+	else if (value > 999 && size == 3)
 		value = 999;
 	else if (value > 99)
 		value = 99;
@@ -430,34 +430,37 @@ void Game::SetTileS(int x, int y, const char str[10]) {
 	for (int i = 0; str[i] != '\0'; i++) {
 		if (toupper(str[i]) >= 65 && toupper(str[i]) <= 91)
 			SetTile(x + i, y, toupper(str[i]) - 45);
+		else if (str[i] == '^')
+			SetTile(x + i, y, 63);
+		else if (str[i] == '*')
+			SetTile(x + i, y, 64);
 	}
 }
 
 void Game::DrawMenu() {
-	SetTileS(3, 6, "Tetris");
-	SetTileS(2, 9, "Play");
-	if (MenuSel == 1)
-		SetTile(7, 9, 48);
+	SetTileS(3, 2, "Tet^is");
+	SetTileS(2, 5, "Play");
+	NewOption(7, 5, 1);
+	SetTileS(2, 7, "Sound");
+	if (tSound)
+		SetTile(8, 7, 8);
 	else
-		SetTile(7, 9, 0);
-	SetTileS(2, 11, "Sound");
-	if (MenuSel == 2 && tSound)
-		SetTile(8, 11, 8);
-	else if(MenuSel == 2 && !tSound)
-		SetTile(8, 11, 3);	
+		SetTile(8, 7, 3);
+	NewOption(9, 7, 2);
+	SetTileS(2, 9, "Music");
+	if (tMusic)
+		SetTile(8, 9, 8);
 	else
-		SetTile(8, 11, 0);
-	SetTileS(2, 13, "Music");
-	if (MenuSel == 3 && tMusic)
-		SetTile(8, 13, 8);
-	else if (MenuSel == 3 && !tMusic)
-		SetTile(8, 13, 3);
-	else
-		SetTile(8, 13, 0);
-	SetTileS(2, 15, "Exit");
-	if (MenuSel == 4)
-		SetTile(7, 15, 48);
-	else
-		SetTile(7, 15, 0);
+		SetTile(8, 9, 3);
+	NewOption(9, 9, 3);
+	SetTileS(2, 11, "Exit");
+	NewOption(7, 11, 4);
 
+}
+
+void Game::NewOption(int x, int y, int listnum) {
+	if (MenuSel == listnum)
+		SetTile(x, y, 48);
+	else
+		SetTile(x, y, 0);
 }
