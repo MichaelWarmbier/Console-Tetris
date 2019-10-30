@@ -4,7 +4,7 @@
 
 int main() {
 	SetConsoleTitle(_T("Tetris"));
-	SetWindowDimensions(WW + 1,WH + 3);
+	SetWindowDimensions(WW + 1,WH + 2);
 	mciSendString("open \"theme.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
 	mciSendString("play mp3 repeat", NULL, 0, NULL);
 	bool tM = true, tS = true; // Passed toggles for music and sound
@@ -71,7 +71,7 @@ void SetWindowDimensions(int x, int y) { // Thanks for this, Sam!
 
 	double horzScale = ((double)cxPhysical / (double)cxLogical);
 	double vertScale = ((double)cyPhysical / (double)cyLogical);
-	SetWindowPos(console, HWND_TOP, 0, 0, x * 16.0 / horzScale, y * 16.0 / vertScale, SWP_NOMOVE);
+	SetWindowPos(console, HWND_TOP, 0, 0, x * (double)GSS / horzScale - 11, y * (double)GSS / vertScale  - 14, SWP_NOMOVE);
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	GetConsoleScreenBufferInfo(handle, &info);
