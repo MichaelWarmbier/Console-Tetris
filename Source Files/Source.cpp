@@ -2,12 +2,14 @@
 
 /* Main */
 
-
 int main() {
 	SetConsoleTitle(_T("Tetris"));
 	SetWindowDimensions(WW + 1,WH + 3);
+	mciSendString("open \"theme.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+	mciSendString("play mp3 repeat", NULL, 0, NULL);
+	bool tM = true, tS = true; // Passed toggles for music and sound
 	do {
-		Game* Tetris = new Game;
+		Game* Tetris = new Game(tM,tS);
 		EXIT_GAME_F = false;
 		while (!EXIT_GAME_F) {
 			Tetris->Draw();
@@ -22,6 +24,7 @@ int main() {
 			EXIT_PROGRAM_F = Tetris->EXIT_P;
 			EXIT_GAME_F = Tetris->EXIT_G;
 		}
+		tM = Tetris->tMusic; tS = Tetris->tSound;
 		delete Tetris;
 	} while (!EXIT_PROGRAM_F);
 	return 0;
