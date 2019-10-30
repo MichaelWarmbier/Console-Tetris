@@ -40,7 +40,7 @@ Inside the releases folder are installer(s). Within file are all dependencies ne
 
 Current Design:
 
-![image](https://cdn.discordapp.com/attachments/474204104248524825/638878959643131914/unknown.png)
+![image](https://cdn.discordapp.com/attachments/474204104248524825/639240018103107614/unknown.png)
 
 Old Design(s):
 
