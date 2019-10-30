@@ -13,8 +13,11 @@ This version of Tetris is being developed using the standard libraries of C++ an
 ## Controls
 
 Movement: WASD / Arrow Keys 
+
 Rotate: Q / E
+
 Pause/Select: Enter
+
 Return/Exit: Escape
 
 ## Installation
