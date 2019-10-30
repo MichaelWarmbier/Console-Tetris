@@ -62,19 +62,31 @@ void Game::Logic() {
 			MenuSel++;
 		else if (pInput == UP)
 			MenuSel--;
-		if (MenuSel > 2)
+		if (MenuSel > 4)
 			MenuSel = 1;
 		if (MenuSel < 1)
-			MenuSel = 2;
+			MenuSel = 4;
 		if (pInput == ENTER) 
 			switch (MenuSel) {
 			case 1:
 				State = DURING;
 				ClearBoard();
 				break;
-			case 2:
+			case 4:
 				EXIT_G = true;
 				EXIT_P = true;
+				break;
+			case 2:
+				tSound = !tSound;
+				break;
+			case 3:
+				tMusic = !tMusic;
+				if (tMusic) {
+					mciSendString("play mp3 repeat", NULL, 0, NULL);
+				}
+				else {
+					mciSendString("stop mp3", NULL, 0, NULL);
+				}
 				break;
 			}
 	}
@@ -95,6 +107,8 @@ void Game::Logic() {
 				DrawBlock(0);
 				ResetBlock();
 				CurrBlck = bX;
+				if (tSound)
+					PlaySound("fall.wav", NULL, SND_FILENAME | SND_ASYNC);
 			}
 		}
 		LineClear();
@@ -237,6 +251,8 @@ void Game::LineClear() {
 					}
 				}
 			}
+			if (tSound)
+				PlaySound("fall.wav", NULL, SND_FILENAME | SND_ASYNC );
 		}
 	}
 }
@@ -424,9 +440,24 @@ void Game::DrawMenu() {
 		SetTile(7, 9, 48);
 	else
 		SetTile(7, 9, 0);
-	SetTileS(2, 11, "Exit");
-	if (MenuSel == 2)
-		SetTile(7, 11, 48);
+	SetTileS(2, 11, "Sound");
+	if (MenuSel == 2 && tSound)
+		SetTile(8, 11, 8);
+	else if(MenuSel == 2 && !tSound)
+		SetTile(8, 11, 3);	
 	else
-		SetTile(7, 11, 0);
+		SetTile(8, 11, 0);
+	SetTileS(2, 13, "Music");
+	if (MenuSel == 3 && tMusic)
+		SetTile(8, 13, 8);
+	else if (MenuSel == 3 && !tMusic)
+		SetTile(8, 13, 3);
+	else
+		SetTile(8, 13, 0);
+	SetTileS(2, 15, "Exit");
+	if (MenuSel == 4)
+		SetTile(7, 15, 48);
+	else
+		SetTile(7, 15, 0);
+
 }
