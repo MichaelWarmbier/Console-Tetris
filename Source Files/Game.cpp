@@ -1,463 +1,330 @@
 #pragma once
-#include "Game.h"
+#include "Header.h"
 
-void Game::DrawSprite(int spriteID, int x, int y) const {
-	if (spriteID < 0)
-		return;
-	SelectObject(hdc, bmap); // Get bitmap..
-	BitBlt(console, x, y, GSS, GSS, hdc, Sprites[spriteID][0], Sprites[spriteID][1], SRCCOPY); // Draw on screen..
-	DeleteObject(bmap); // Delete bitmap..
-}
+class Game {
+private:
+	const int Sprites[256][2] {
+		000,000, // Background				// 000
+		//////////////////////////////////////////
+		 16,000, // Dark Gray Tile			// 001
+		144,000, // Light Gray Tile			// 002
+		 32,000, // Red Tile				// 003
+		 48,000, // Cyan Tile				// 004
+		 64,000, // Orange Tile				// 005
+		 80,000, // Blue Tile				// 006
+		 96,000, // Pink Tile				// 007
+		112,000, // Green Tile				// 008
+		128,000, // Yellow Tile				// 009
+		//////////////////////////////////////////
+		160,000, // #0						// 010
+		176,000, // #1						// 011
+		192,000, // #2						// 012
+		208,000, // #3						// 013
+		224,000, // #4						// 014
+		240,000, // #5						// 015
+		000, 16, // #6						// 016
+		 16, 16, // #7						// 017
+		 32, 16, // #8						// 018
+		 48, 16, // #9						// 019
+		//////////////////////////////////////////
+		 64, 16, // A						// 020
+		 80, 16, // B						// 021
+		 96, 16, // C						// 022
+		112, 16, // D						// 023
+		128, 16, // E						// 024
+		144, 16, // F						// 025
+		160, 16, // G						// 026
+		176, 16, // H						// 027
+		192, 16, // I						// 028
+		208, 16, // J						// 029
+		224, 16, // K						// 030
+		240, 16, // L						// 031
+		000, 32, // M						// 032
+		 16, 32, // N						// 033
+		 32, 32, // O						// 034
+		 48, 32, // P						// 035
+		 64, 32, // Q						// 036
+		 80, 32, // R						// 037
+		 96, 32, // S						// 038
+		112, 32, // T						// 039
+		128, 32, // U						// 040
+		144, 32, // V						// 041
+		160, 32, // W						// 042
+		176, 32, // X						// 043
+		192, 32, // Y						// 044
+		208, 32, // Z						// 045
+		//////////////////////////////////////////
+		240, 32, // :						// 046
+		 16, 48, // ?						// 047
+		000, 48, // !						// 048
+		 48, 48, // .						// 049
+		224, 32, // -						// 050
+		 32, 48, // "						// 051
+		//////////////////////////////////////////
+		 64, 48, // O Preview				// 052
+		 80, 48, // T Preview				// 053
+		 96, 48, // I Preview				// 054
+		112, 48, // L Preview				// 055
+		128, 48, // J Preview				// 056
+		144, 48, // S Preview				// 057
+		160, 48, // Z Preview				// 058
+		176, 48, // =						// 059
+		192, 48, // NE						// 060
+		208, 48, // XT						// 061
+		224, 48, // Empty					// 062
+	};
 
-void Game::DrawBoard() const {
-	/* Go through each index of the matrix and draw a sprite accordingly */
-	for (int y = 0; y < WH; y++) {
-		for (int x = 0; x < WW; x++) {
-			DrawSprite(Board[y][x], x * GSS, y * GSS);
-		}
-	}
-}
+	int BlockNums[7] = { 0,0,0,0,0,0,0 }; // Number of times each block has fallen
 
-void Game::Draw() {
-	DrawBoard();
-	DrawBlock(true);
-	DrawNextBlock();
-	DrawInteger(7, 22, 3, Level);
-	DrawInteger(7, 23, 3, LinesC);
-	for (int i = 0; i < 7; i++)
-		DrawInteger(12, 7 + (2 * i), 2, BlockNums[i]);
-}
+	int Level; // Current Level
+	int LinesC; // Lines Cleared
+	int X, Y; // Axis coordinates
+	int Rot; // Current rotation 
+	double _DropTS; // Time stamp for decrementing block
+	double WaitTime; // Variable for game speed
+	bool SpeedUp; // Flag for increasing speed
+	int MenuSel; // Menu selection
 
-void Game::Input() {
-	if (!Pause) {
+	Direction pInput; // User Input
+	
+	BlockType CurrBlck; // Current falling block
+	BlockType NxtBlck; // Next block to fall
+
+	int Board[WH][WW] = {
+		02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,60,61,46,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,00,00,00,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,00,00,00,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,52,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,53,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,54,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,55,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,56,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,57,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,58,02,10,10,02,
+		02,00,00,00,00,00,00,00,00,00,00,02,02,02,02,02,02,
+		02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,02,
+		02,31,24,41,24,31,46,02,10,10,10,02,02,02,02,02,02,
+		02,31,28,33,24,38,46,02,10,10,10,02,02,02,02,02,02,
+	};
+	int BoardCopy[WH][WW]; // Copy of Board[][] used for comparison when detecting collision
+	/* Block Data -- Temporary, may combine */
+	const struct B1 {
+	public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			1,0,
+			1,1,
+			0,1,
+		//////////// - Rotation 2
+			1,0,
+			1,1,
+			0,1,
+		//////////// - Rotation 3
+			1,0,
+			1,1,
+			0,1,
+		//////////// - Rotation 4
+			1,0,
+			1,1,
+			0,1,
+		};
+	}; B1 O; // O Block Data
+	const struct B2{
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,-1,
+			0,1,
+			0,2,
+		//////////// - Rotation 2
+			-1,0,
+			1,0,
+			2,0,
+		//////////// - Rotation 3
+			0,-1,
+			0,1,
+			0,2,
+		//////////// - Rotation 4
+			-1,0,
+			1,0,
+			2,0,
+		};
+	}; B2 I; // I Block Data
+	const struct B3 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			-1,0,
+			1,0,
+			0,1,
+		//////////// - Rotation 2
+			-1,0,
+			0,-1,
+			0,1,
+		//////////// - Rotation 3
+			-1,0,
+			1,0,
+			0,-1,
+		//////////// - Rotation 4
+			1,0,
+			0,-1,
+			0,1,
+		};
+	}; B3 T; // T Block Data
+	const struct B4 {
+	public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,-1,
+			0,1,
+			1,1,
+		//////////// - Rotation 2
+			-1,0,
+			1,0,
+			1,-1,
+		//////////// - Rotation 3
+			0,-1,
+			0,1,
+			-1,-1,
+		//////////// - Rotation 4
+			-1,0,
+			1,0,
+			-1,1,
+		};
+	}; B4 L; // L Block Data
+	const struct B5 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,-1,
+			0,1,
+			1,-1,
+		//////////// - Rotation 2
+			-1,0,
+			1,0,
+			-1,-1,
+		//////////// - Rotation 3
+			0,-1,
+			0,1,
+			-1,1,
+		//////////// - Rotation 4
+			-1,0,
+			1,0,
+			1,1,
+		};
+	}; B5 J; // J Block Data
+	const struct B6 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			0,1,
+			1,0,
+			-1,1,
+		//////////// - Rotation 2
+			-1,0,
+			-1,-1,
+			0,1,
+		//////////// - Rotation 3
+			-1,0,
+			0,-1,
+			1,-1,
+		//////////// - Rotation 4
+			0,-1,
+			1,0,
+			1,1,
+		};
+	}; B6 S; // S Block Data
+	const struct B7 {
+		public:
+		int Limbs[12][2]{
+		/*  X,Y   */
+		//////////// - Rotation 1
+			-1,0,
+			0,1,
+			1,1,
+		//////////// - Rotation 2
+			0,-1,
+			-1,0,
+			-1,1,
+		//////////// - Rotation 3
+			0,-1,
+			-1,-1,
+			1,0,
+		//////////// - Rotation 4
+			1,0,
+			1,-1,
+			0,1,
+		};
+	}; B7 Z; // Z Block Data
+
+public:
+	bool EXIT_G, EXIT_P; // Exit conditions before being transfered
+	GameState State; // State of the game
+	bool Pause; // Pause flag
+	bool tSound; // Sound Toggle
+	bool tMusic; // Music Toggle
+
+	void DrawSprite(int spriteID, int x, int y) const; // Uses the index of sprites and active bitmap to output a sprite of the current global sprite size
+	void DrawBoard() const; // Outputs Board[][] using DrawSprite
+	void SetAxis(int x, int y); // Sets the given coordinate to the current axis
+	void CopyBoard(); // Copies data of Board to BoardCopy
+	bool IsBlockData(const int data) const; // Returns true if given data is associated with block sprites
+	void DrawBlock(bool SolidFlag); // Draws CurrBlck at axis
+	void ClearBoardCopy(); // Clears inside of the board copy
+	void ClearBoard(); // Clears inside of the board
+	void SetTile(int x, int y, int ID); // Sets a Board[][] index to given ID
+	void BlockTest(); // Tests block drawing
+	void DrawNextBlock(); // Draws icon for upcoming block
+	void ApplyInput(); // Applies input specifically in logic
+	BlockType GetRandomBlock() const; // Returns random BlockType
+	bool DecrementBlock(); // Y++
+	void DrawPause(); // Draws "Pause" string
+	bool IsSolid(Direction Dir); // Collision Check
+	void ResetBlock(); // Resets block position to top
+	void DrawInteger(int x, int y, int size, int value); // Draw integer of two or three digits at a position
+	void LineClear(); // Returns true and clears a line if it can be
+	void DrawMenu(); // Draws details for menu
+	void SetTileS(int x, int y, const char str[10]); // Sets a string of text as tiles
+	void GameOver(); // Begins game over sequence if game has been lost
+
+	/* Logic functions for main loop*/
+	void Draw();
+	void Input();
+	void Logic();
+
+	/* Definitions of constructors and destructors may be changed later */
+	Game(bool M, bool S):tMusic(M),tSound(S) { 
+		MenuSel = 1;
+		State = BEFORE; 
 		pInput = NONE;
-		if (KeyIsDown('W', true, false) || KeyIsDown(38, true, false))
-			pInput = UP;
-		else if (KeyIsDown('S', true, (State == DURING)) || KeyIsDown(40, true, (State == DURING)))
-			pInput = DOWN;
-		else if (KeyIsDown('A', true, false) || KeyIsDown(37, true, false))
-			pInput = LEFT;
-		else if (KeyIsDown('D', true, false) || KeyIsDown(39, true, false))
-			pInput = RIGHT;
-		else if (KeyIsDown('Q', true, false))
-			pInput = RL;
-		else if (KeyIsDown('E', true, false))
-			pInput = RR;
-		else if (KeyIsDown(27, true, false) && State == DURING)
-			EXIT_G = true;
-	}
-	if (KeyIsDown(13, true, false)) {
-		pInput = ENTER;
-		if (State == DURING)
-			Pause = !Pause;
-	}
-}
-
-void Game::Logic() {
-	if (ForceSpriteTest)
-		BlockTest();
-	else if (State == BEFORE) {
-		DrawMenu();
-		if (pInput == DOWN)
-			MenuSel++;
-		else if (pInput == UP)
-			MenuSel--;
-		if (MenuSel > 4)
-			MenuSel = 1;
-		if (MenuSel < 1)
-			MenuSel = 4;
-		if (pInput == ENTER) 
-			switch (MenuSel) {
-			case 1:
-				State = DURING;
-				ClearBoard();
-				break;
-			case 4:
-				EXIT_G = true;
-				EXIT_P = true;
-				break;
-			case 2:
-				tSound = !tSound;
-				break;
-			case 3:
-				tMusic = !tMusic;
-				if (tMusic) {
-					mciSendString("play mp3 repeat", NULL, 0, NULL);
-				}
-				else {
-					mciSendString("stop mp3", NULL, 0, NULL);
-				}
-				break;
-			}
-	}
-	else if (State == DURING) {
-		if (CurrBlck == bX) {
-			CurrBlck = NxtBlck;
-			NxtBlck = GetRandomBlock();
-			BlockNums[(int)CurrBlck]++;
-		}
-		else {
-			ApplyInput();
-			if (!IsSolid(DOWN) && DecrementBlock()) {
-				DecrementBlock();
-				ClearBoard();
-				DrawBlock(true);
-			}
-			else if (IsSolid(DOWN) && DecrementBlock()) {
-				DrawBlock(0);
-				ResetBlock();
-				CurrBlck = bX;
-				if (tSound)
-					PlaySound("fall.wav", NULL, SND_FILENAME | SND_ASYNC);
-			}
-		}
-		LineClear();
-		ClearBoard();
-		GameOver();
-		Level = LinesC / 10 + 1;
-		if (Level <= 3)
-			WaitTime = 1.2 - ((Level - 1.0) * .20);
-	}
-	else if (State == AFTER) {
-		DrawBoard();
-		Wait(2);
-		EXIT_G = true;
-	}
-	DrawBlock(true);
-}
-
-void Game::ResetBlock() {
-	X = 5;
-	Y = 2;
-}
-
-void Game::SetAxis(int x, int y) {
-	Board[Y][X] = 0;
-	X = x, Y = y;
-	Board[y][x] = 1; // Note: TBC
-}
-
-void Game::CopyBoard() {
-	for (int y = 0; y < WH; y++) {
-		for (int x = 0; x < WW; x++) {
-			BoardCopy[y][x] = Board[y][x];
-		}
-	}
-}
-
-bool Game::IsBlockData(int data) const {
-	for (int i = 1; i < 10; i++) {
-		if (data == i)
-			return true;
-	}
-	return false;
-}
-
-void Game::DrawBlock(bool SolidFlag) {
-	switch (CurrBlck) {
-	case bO:
-		SetTile(X, Y, pow(9, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + O.Limbs[i][0], Y + O.Limbs[i][1], pow(9, SolidFlag));
-		break;
-	case bI:
-		SetTile(X, Y, pow(4, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + I.Limbs[i][0], Y + I.Limbs[i][1], pow(4, SolidFlag));
-		break;
-	case bT:
-		SetTile(X, Y, pow(7, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + T.Limbs[i][0], Y + T.Limbs[i][1], pow(7, SolidFlag));
-		break;
-	case bL:
-		SetTile(X, Y, pow(5, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + L.Limbs[i][0], Y + L.Limbs[i][1], pow(5, SolidFlag));
-		break;
-	case bJ:
-		SetTile(X, Y, pow(6, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + J.Limbs[i][0], Y + J.Limbs[i][1], pow(6, SolidFlag));
-		break;
-	case bS:
-		SetTile(X, Y, pow(8, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + S.Limbs[i][0], Y + S.Limbs[i][1], pow(8, SolidFlag));
-		break;
-	case bZ:
-		SetTile(X, Y, pow(3, SolidFlag));
-		for (int i = 0 + (Rot * 3); i < 3 + (Rot * 3); i++)
-			SetTile(X + Z.Limbs[i][0], Y + Z.Limbs[i][1], pow(3, SolidFlag));
-		break;
-	}
-}
-
-void Game::SetTile(int x, int y, int ID) {
-	Board[y][x] = ID;
-}
-
-void Game::BlockTest() {
-	for (int i = 0; i < 7; i++) {
-		for (int j = 0; j < 4; j++) {
-			ClearBoard();
-			CurrBlck = (BlockType)i;
-			Rot = j;
-			DrawBlock(true);
-			DrawBoard();
-			Wait(1);
-		}
-	}
-}
-
-void Game::ClearBoardCopy() {
-	for (int y = 0; y < BH; y++) {
-		for (int x = 0; x < BW; x++) {
-			BoardCopy[y + 1][x + 1] = 0;
-		}
-	}
-}
-
-void Game::ClearBoard() {
-	for (int y = 0; y < BH; y++) {
-		for (int x = 0; x < BW; x++) {
-			if (Board[y + 1][x + 1] != 1)
-				SetTile(x + 1, y + 1, 0);
-		}
-	}
-}
-
-void Game::LineClear() {
-	for (int y = 0 + 1; y < BH + 1; y++) {
-		int SolidBlocks = 0;
-		for (int x = 0 + 1; x < BW + 1; x++) {
-			if (Board[y][x] == 1)
-				SolidBlocks++;
-		}
-		if (SolidBlocks == 10) {
-			LinesC++;
-			for (int i = 0; i < 5; i++) {
-				for (int j = 0 + 1; j < BW + 1; j++) {
-					Board[y][j] = !Board[y][j];
-				}
-				Wait(.05);
-				DrawBoard();
-			}
-			for (int i = y - 1; i > 0; i--) {
-				for (int j = 0 + 1; j < BW + 1; j++) {
-					if (Board[i][j] == 1) {
-						Board[i][j] = 0;
-						Board[i + 1][j] = 1;
-					}
-				}
-			}
-			if (tSound)
-				PlaySound("fall.wav", NULL, SND_FILENAME | SND_ASYNC );
-		}
-	}
-}
-
-BlockType Game::GetRandomBlock() const {
-	return (BlockType)distribution(generator);
-}
-
-void Game::DrawNextBlock() {
-	if (NxtBlck == bX)
-	SetTile(13, 2, 47);
-	else
-		SetTile(13, 2, 52 + (int)NxtBlck);
-
-}
-
-bool Game::DecrementBlock() {
-	if ((GetTimeSince(_DropTS) > WaitTime || (SpeedUp && GetTimeSince(_DropTS) > .05))) {
-		if (!IsSolid(DOWN))
-			Y++;
+		X = 5, Y = 2;
+		CurrBlck = bX;
+		NxtBlck = bX;
+		Rot = 0; 
+		Level = 1;
+		Pause = false;
+		LinesC = 0;
 		_DropTS = GetTime();
+		WaitTime = 1.5;
 		SpeedUp = false;
-		return true;
-	}
-	return false;
-}
-
-bool Game::IsSolid(Direction Dir) {
-	int adjX = 0, adjY = 0, adjR = Rot;
-	switch (Dir) {
-	case NONE:
-	case RL:
-		adjR = Rot - 1;
-		break;
-	case RR:
-		adjR = Rot + 1;
-		break;
-	case UP:
-		adjY--;
-		break;
-	case DOWN:
-		adjY++;
-		break;
-	case LEFT:
-		adjX--;
-		break;
-	case RIGHT:
-		adjX++;
-		break;
-	}
-	if (adjR < 0)
-		adjR = 3;
-	else if (adjR > 3)
-		adjR = 0;
-	ClearBoard();
-	CopyBoard();
-	DrawBlock(true);
-	if (IsBlockData(BoardCopy[Y + adjY][X + adjX]))
-		return true;
-	switch (CurrBlck) {
-	case bO:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + O.Limbs[i][1]][X + adjX + O.Limbs[i][0]]))
-					return true;
-		break;
-	case bI:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + I.Limbs[i][1]][X + adjX + I.Limbs[i][0]]))
-					return true;
-		break;
-	case bT:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + T.Limbs[i][1]][X + adjX + T.Limbs[i][0]]))
-					return true;
-		break;
-	case bL:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + L.Limbs[i][1]][X + adjX + L.Limbs[i][0]]))
-					return true;
-		break;
-	case bJ:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + J.Limbs[i][1]][X + adjX + J.Limbs[i][0]]))
-					return true;
-		break;
-	case bS:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + S.Limbs[i][1]][X + adjX + S.Limbs[i][0]]))
-					return true;
-		break;
-	case bZ:
-		for (int i = 0 + (adjR * 3); i < 3 + (adjR * 3); i++)
-			if (IsBlockData(BoardCopy[Y + adjY + Z.Limbs[i][1]][X + adjX + Z.Limbs[i][0]]))
-					return true;
-		break;
-	}
- 	return false;
-}
-
-void Game::ApplyInput() {
-	switch (pInput) {
-	case RL:
-		if (!IsSolid(RL))
-			Rot--;
-		break;
-	case RR:
-		if (!IsSolid(RR))
-			Rot++;
-		break;
-	case DOWN:
-		SpeedUp = true;
-		break;
-	case LEFT:
-		if (!IsSolid(LEFT))
-			X--;
-		break;
-	case RIGHT:
-		if (!IsSolid(RIGHT))
-			X++;
-		break;
-	}
-	if (Rot < 0)
-		Rot = 3;
-	else if (Rot > 3)
-		Rot = 0;
-}
-
-void Game::DrawPause() {
-	DrawSprite(35, 3 * 16, 8 * 16);
-	DrawSprite(20, 4 * 16, 8 * 16);
-	DrawSprite(40, 5 * 16, 8 * 16);
-	DrawSprite(38, 6 * 16, 8 * 16);
-	DrawSprite(24, 7 * 16, 8 * 16);
-	DrawSprite(23, 8 * 16, 8 * 16);
-}
-
-void Game::DrawInteger(int x, int y, int size, int value) {
-	if (size != 3 && size != 2 && size != 4)
-		size = 2;
-	if (value > 9999 && size == 4)
-		value = 9999;
-	else if (value > 999.0 & size == 3.0)
-		value = 999;
-	else if (value > 99)
-		value = 99;
-	int Digits[4] = {value % 1000, (value % 1000) / 100, (value % 100) / 10 , value % 10 };
-	for (int i = 0; i < size; i++)
-		SetTile(x + (3 - i), y, Digits[3 - i] + 10);
-}
-
-void Game::GameOver() {
-	for (int i = 5; i < 7; i++)
-		if (Board[2][i] == 1) {
-			State = AFTER;
-			for (int y = BH; y > 0; y--) {
-				for (int x = 0 + 1; x < BW + 1; x++) {
-					Board[y][x] = 1;
-					Wait(.03);
-					DrawBoard();
-				}
-			}
-			SetTile(4, 8, 26);
-			SetTile(5, 8, 20);
-			SetTile(6, 8, 32);
-			SetTile(7, 8, 24);
-			SetTile(4, 9, 34);
-			SetTile(5, 9, 41);
-			SetTile(6, 9, 24);
-			SetTile(7, 9, 37);
-			break;
-		}
-}
-
-void Game::SetTileS(int x, int y, const char str[10]) {
-	for (int i = 0; str[i] != '\0'; i++) {
-		if (toupper(str[i]) >= 65 && toupper(str[i]) <= 91)
-			SetTile(x + i, y, toupper(str[i]) - 45);
-	}
-}
-
-void Game::DrawMenu() {
-	SetTileS(3, 6, "Tetris");
-	SetTileS(2, 9, "Play");
-	if (MenuSel == 1)
-		SetTile(7, 9, 48);
-	else
-		SetTile(7, 9, 0);
-	SetTileS(2, 11, "Sound");
-	if (MenuSel == 2 && tSound)
-		SetTile(8, 11, 8);
-	else if(MenuSel == 2 && !tSound)
-		SetTile(8, 11, 3);	
-	else
-		SetTile(8, 11, 0);
-	SetTileS(2, 13, "Music");
-	if (MenuSel == 3 && tMusic)
-		SetTile(8, 13, 8);
-	else if (MenuSel == 3 && !tMusic)
-		SetTile(8, 13, 3);
-	else
-		SetTile(8, 13, 0);
-	SetTileS(2, 15, "Exit");
-	if (MenuSel == 4)
-		SetTile(7, 15, 48);
-	else
-		SetTile(7, 15, 0);
-
-}
+		EXIT_G = false;
+		EXIT_P = false;
+	};
+	~Game() { };
+};
