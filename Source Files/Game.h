@@ -199,7 +199,7 @@ private:
 		//////////// - Rotation 2
 			-1,0,
 			1,0,
-			1,-1,
+			-1,1,
 		//////////// - Rotation 3
 			0,-1,
 			0,1,
@@ -207,7 +207,7 @@ private:
 		//////////// - Rotation 4
 			-1,0,
 			1,0,
-			-1,1,
+			1,-1,
 		};
 	}; B4 L; // L Block Data
 	const struct B5 {
@@ -221,7 +221,7 @@ private:
 		//////////// - Rotation 2
 			-1,0,
 			1,0,
-			-1,-1,
+			1,1,
 		//////////// - Rotation 3
 			0,-1,
 			0,1,
@@ -229,7 +229,7 @@ private:
 		//////////// - Rotation 4
 			-1,0,
 			1,0,
-			1,1,
+			-1,-1,
 		};
 	}; B5 J; // J Block Data
 	const struct B6 {
