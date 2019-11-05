@@ -6,6 +6,9 @@ Tetris is the original block-puzzle game desigend by Alexey Pajitnov and release
 
 ###### This game is old. Try out Pacman for a console game created after I improved some more!
 
+![image](https://cdn.discordapp.com/attachments/474204104248524825/639240018103107614/unknown.png)
+
+
 ## Description
 
 This version of Tetris is being developed using the standard libraries of C++ and the Windows.h header. Written and compiled in Visual Studio 2019. 
@@ -34,16 +37,8 @@ Inside the releases folder are installer(s). Within file are all dependencies ne
 
 * Releases - Contains installers.
 
-## Design
-
-Current Design:
-
-![image](https://cdn.discordapp.com/attachments/474204104248524825/639240018103107614/unknown.png)
-
-Old Design(s):
+## Old Designs
 
 ![image](https://user-images.githubusercontent.com/44079959/61317725-987f6500-a7d1-11e9-9d16-eeb0b2f48b60.png)
 
 ![image](https://user-images.githubusercontent.com/44079959/59775479-4ce3a500-927f-11e9-8871-479e8500e695.png)
-
-Console Tetris was programmed with C++ using Microsoft Visual Studio. 
