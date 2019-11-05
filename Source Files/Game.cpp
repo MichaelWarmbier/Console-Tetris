@@ -40,9 +40,9 @@ void Game::Input() {
 		else if (KeyIsDown('D', true, false) || KeyIsDown(39, true, false))
 			pInput = RIGHT;
 		else if (KeyIsDown('Q', true, false))
-			pInput = RL;
-		else if (KeyIsDown('E', true, false))
 			pInput = RR;
+		else if (KeyIsDown('E', true, false))
+			pInput = RL;
 		else if (KeyIsDown(27, true, false) && State == DURING)
 			EXIT_G = true;
 	}
@@ -115,8 +115,8 @@ void Game::Logic() {
 		ClearBoard();
 		GameOver();
 		Level = LinesC / 5 + 1;
-		if (Level <= 5)
-			WaitTime = 1.2 - ((Level - 1.0) * .15);
+		if (Level <= 10)
+			WaitTime = 1 - ((Level - 1.0) * .10);
 	}
 	else if (State == AFTER) {
 		DrawBoard();
@@ -410,7 +410,7 @@ void Game::GameOver() {
 			for (int y = BH; y > 0; y--) {
 				for (int x = 0 + 1; x < BW + 1; x++) {
 					Board[y][x] = 1;
-					Wait(.03);
+					Wait(.01);
 					DrawBoard();
 				}
 			}
