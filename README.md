@@ -4,7 +4,7 @@
 
 Tetris is the original block-puzzle game desigend by Alexey Pajitnov and released on June 6th, 1984.
 
-###### Game is currently unnfinished. Please keep this in mind when executing current or old releases.
+###### This game is old. Try out Pacman for a console game created after I improved some more!
 
 ## Description
 
@@ -25,8 +25,6 @@ Return/Exit: Escape
 Inside the releases folder are installer(s). Within file are all dependencies necessary to run the game. (Note: Older versions may be missing some .dll files, download the Visual C++ Redstristributables to remedy this)
 
 ## File System
-
-* Executables - Each executable is associated with a different build versions. In order to run an executable and properly play the game, all associated files must be present (including .dlls, the spritesheet and sound files).
 
 * Sounds - All sounds files used in the game.
 
