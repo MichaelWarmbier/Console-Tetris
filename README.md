@@ -4,7 +4,7 @@
 
 Tetris is the original block-puzzle game desigend by Alexey Pajitnov and released on June 6th, 1984.
 
-###### This game is old. Try out Pacman for a console game created after I improved some more!
+###### This game is old. As such, the code will reflect that. Check out the code for Pacman for a console game created after I improved some more!
 
 ![image](https://cdn.discordapp.com/attachments/474204104248524825/639240018103107614/unknown.png)
 
