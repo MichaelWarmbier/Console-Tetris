@@ -43,6 +43,6 @@ Inside the releases folder are installer(s). Within file are all dependencies ne
 
 ![image](https://user-images.githubusercontent.com/44079959/59775479-4ce3a500-927f-11e9-8871-479e8500e695.png)
 
-![image](https://gyazo.com/78e7d1d9312fa1079f582eb8abc5f326.gif)
+![image](https://cdn.discordapp.com/attachments/493866855363117057/549062700517294107/Gameplay-1.gif)
 
 ![image](https://i.gyazo.com/78e7d1d9312fa1079f582eb8abc5f326.gif)
