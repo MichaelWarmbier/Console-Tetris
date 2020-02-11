@@ -42,4 +42,4 @@ Inside the releases folder are installer(s). Within file are all dependencies ne
 ![image](https://user-images.githubusercontent.com/44079959/61317725-987f6500-a7d1-11e9-9d16-eeb0b2f48b60.png)
 
 ![image](https://user-images.githubusercontent.com/44079959/59775479-4ce3a500-927f-11e9-8871-479e8500e695.png)
-![image](https://gyazo.com/78e7d1d9312fa1079f582eb8abc5f326)
+![image](https://i.gyazo.com/78e7d1d9312fa1079f582eb8abc5f326.mp4)
