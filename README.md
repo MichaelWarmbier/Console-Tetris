@@ -4,14 +4,12 @@
 
 Tetris is the original block-puzzle game desigend by Alexey Pajitnov and released on June 6th, 1984.
 
-###### This game is old. As such, the code will reflect that. Check out the code for Pacman for a console game created after I improved some more!
-
 ![image](https://cdn.discordapp.com/attachments/474204104248524825/639240018103107614/unknown.png)
 
 
 ## Description
 
-This version of Tetris is being developed using the standard libraries of C++ and the Windows.h header. Written and compiled in Visual Studio 2019. 
+This version of Tetris is was developed using the standard libraries of C++ and the Windows.h header. Written and compiled in Visual Studio 2019. 
 
 ## Controls
 
@@ -25,7 +23,7 @@ Return/Exit: Escape
 
 ## Installation
 
-Inside the releases folder are installer(s). Within file are all dependencies necessary to run the game. (Note: Older versions may be missing some .dll files, download the Visual C++ Redstristributables to remedy this)
+Inside the releases folder are installer(s).  (Note: Does not include C++ Redstristributables. Necessary to run.)
 
 ## File System
 
