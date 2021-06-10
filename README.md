@@ -11,6 +11,8 @@ Tetris is the original block-puzzle game desigend by Alexey Pajitnov and release
 
 This version of Tetris is was developed using the standard libraries of C++ and the Windows.h header. Written and compiled in Visual Studio 2019. 
 
+Designed with the goal of practicing complex collision interactions.
+
 ## Controls
 
 Movement: WASD / Arrow Keys 
