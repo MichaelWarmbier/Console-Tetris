@@ -27,6 +27,8 @@ Return/Exit: Escape
 
 Inside the releases folder are installer(s).  (Note: Does not include C++ Redstristributables. Necessary to run.)
 
+Alternatively, you can compile this by creating a new C++ project with all the source files.
+
 ## File System
 
 * Sounds - All sounds files used in the game.
