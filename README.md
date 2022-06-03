@@ -13,6 +13,8 @@ This version of Tetris is was developed using the standard libraries of C++ and 
 
 Designed with the goal of practicing complex collision interactions.
 
+For a web-based version, see [jsTetris](https://michaelwarmbier.github.io/jsTetris/index.html)
+
 ## Controls
 
 Movement: WASD / Arrow Keys 
@@ -25,9 +27,7 @@ Return/Exit: Escape
 
 ## Installation
 
-Inside the releases folder are installer(s).  (Note: Does not include C++ Redstristributables. Necessary to run.)
-
-Alternatively, you can compile this by creating a new C++ project with all the source files.
+Installer available on [current release](https://github.com/MichaelWarmbier/Console-Tetris/releases/tag/v1.0). Does not include necessary Visual C++ Redistributables required to run application.
 
 ## File System
 
